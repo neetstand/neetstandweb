@@ -1,77 +1,96 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { OtpService } from "@/services/otp";
 
-export async function signInWithEmail(formData: FormData) {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const supabase = await createClient();
+export type UserStatus = {
+    exists: boolean;
+    identifierType: "email" | "phone" | null;
+    isIndia: boolean;
+};
 
-    const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-    });
+export async function checkUserStatus(identifier: string, isPhone: boolean = false): Promise<UserStatus> {
+    let isIndia = false;
 
-    if (error) {
-        return { error: error.message };
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.warn("Missing SUPABASE_SERVICE_ROLE_KEY");
+        return { exists: false, identifierType: isPhone ? "phone" : "email", isIndia: false };
     }
 
-    redirect("/");
-}
-
-export async function signUpWithEmail(formData: FormData) {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const supabase = await createClient();
-
-    const { error } = await supabase.auth.signUp({
-        email,
-        password,
-    });
-
-    if (error) {
-        return { error: error.message };
+    if (isPhone) {
+        if (identifier.startsWith("+91")) isIndia = true;
     }
 
-    return { success: true, message: "Check your email to confirm your account." };
-}
+    try {
+        const supabase = createAdminClient();
+        // NOTE: listUsers is efficient enough for small userbases, but check specifically by filter if possible
+        // But listUsers doesn't support filtering by phone directly in the method easily without iterating
+        // or using search. For production with many users, getUserById is strictly by ID.
+        // We can use listUsers({ query: identifier }) if supported, but typically we iterate or rely on catching sign-up errors.
+        // However, for "checkUserStatus" to be accurate, we will iterate the list (assuming <1000 users for now).
+        // Optimization: Use `getUserByEmail` if email. Phone is harder.
 
-export async function signInWithOtp(formData: FormData) {
-    const phone = formData.get("phone") as string;
-    const supabase = await createClient();
+        let exists = false;
 
-    const { error } = await supabase.auth.signInWithOtp({
-        phone,
-    });
+        if (!isPhone) {
+            const { data, error } = await supabase.auth.admin.listUsers();
+            if (!error && data.users) {
+                exists = data.users.some(u => u.email === identifier);
+            }
+        } else {
+            const { data, error } = await supabase.auth.admin.listUsers();
+            if (!error && data.users) {
+                exists = data.users.some(u => u.phone === identifier);
+            }
+        }
 
-    if (error) {
-        return { error: error.message };
+        return {
+            exists,
+            identifierType: isPhone ? "phone" : "email",
+            isIndia
+        };
+
+    } catch (error) {
+        console.error("Check User failed:", error);
+        return {
+            exists: false,
+            identifierType: isPhone ? "phone" : "email",
+            isIndia: false
+        };
     }
-
-    return { success: true };
 }
 
-export async function verifyOtp(formData: FormData) {
-    const phone = formData.get("phone") as string;
-    const token = formData.get("otp") as string;
-    const supabase = await createClient();
+// -- Custom OTP Actions --
 
-    const { error } = await supabase.auth.verifyOtp({
-        phone,
-        token,
-        type: "sms",
-    });
+export async function sendCustomOtp(identifier: string, isPhone: boolean) {
+    return await OtpService.send(identifier, isPhone);
+}
 
-    if (error) {
-        return { error: error.message };
+export async function verifyCustomOtp(token: string, otp: string) {
+    return await OtpService.verify(token, otp);
+}
+
+export async function registerUser(email: string, phone: string) {
+    const supabase = createAdminClient();
+
+    try {
+        const { data, error } = await supabase.auth.admin.createUser({
+            email,
+            phone,
+            email_confirm: true,
+            phone_confirm: true,
+            user_metadata: { phone_number: phone }
+        });
+
+        if (error) throw error;
+
+        // After creation, send OTP
+        return await sendCustomOtp(email, false); // Send to email
+    } catch (error) {
+        console.error("Registration Error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Registration failed";
+        return { error: errorMessage };
     }
-
-    redirect("/");
 }
 
-export async function signOut() {
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-    redirect("/login");
-}
+

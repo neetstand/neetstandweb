@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export const Footer = () => {
     const { theme } = useTheme();
@@ -19,10 +20,32 @@ export const Footer = () => {
 
     const isDark = theme === "dark";
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.3
+            }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+    };
+
     return (
-        <footer className="py-12 px-6 bg-sky-200 dark:bg-slate-800 text-sky-950 dark:text-slate-100 border-t border-sky-300 dark:border-slate-600 text-base">
+        <motion.footer
+            className="relative z-50 py-12 px-6 bg-sky-200/80 dark:bg-slate-800/80 backdrop-blur-md text-sky-950 dark:text-slate-100 border-t border-sky-300 dark:border-slate-600 text-base"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            variants={container}
+        >
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-                <div>
+                <motion.div variants={item}>
                     <h3 className="font-bold text-lg mb-4">
                         <Image
                             src={isDark ? "/neetstand-dark.png" : "/neetstand-light.png"}
@@ -35,14 +58,13 @@ export const Footer = () => {
                     <p className="text-sky-800 dark:text-slate-400">
                         The Right Stop for NEET Prep
                     </p>
-                </div>
+                </motion.div>
                 {[
                     {
                         title: "Product",
                         links: [
                             { label: "Features", href: "/#features" },
-                            { label: "Pricing", href: "/#pricing" },
-                            { label: "How It Works", href: "/#how-it-works" },
+                            { label: "Pricing", href: "/#pricing" }
                         ],
                     },
                     {
@@ -61,7 +83,7 @@ export const Footer = () => {
                         ],
                     },
                 ].map((col, i) => (
-                    <div key={i}>
+                    <motion.div key={i} variants={item}>
                         <h4 className="font-bold mb-4">{col.title}</h4>
                         <ul className="text-sky-800 dark:text-slate-400 space-y-2">
                             {col.links.map((link, j) => (
@@ -75,12 +97,15 @@ export const Footer = () => {
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
-            <div className="border-t border-sky-300 dark:border-slate-600 pt-8 text-center text-sky-800 dark:text-slate-400">
+            <motion.div
+                className="border-t border-sky-300 dark:border-slate-600 pt-8 text-center text-sky-800 dark:text-slate-400"
+                variants={item}
+            >
                 <p>© 2026 NEETStand. All rights reserved.</p>
-            </div>
-        </footer>
+            </motion.div>
+        </motion.footer>
     );
 };

@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
-import { AuthModal } from "@/components/auth/AuthModal";
+import { useRouter, usePathname } from "next/navigation";
+
 
 export function Navbar() {
     const { setTheme, theme } = useTheme();
@@ -27,7 +27,13 @@ export function Navbar() {
     const [lastScrollY, setLastScrollY] = useState(0);
     const [user, setUser] = useState<SupabaseUser | null>(null);
     const router = useRouter();
+    const pathname = usePathname();
     const supabase = createClient();
+
+    // ... existing useEffects ...
+
+    // Check if we are on an auth page
+    const isAuthPage = pathname === "/login" || pathname === "/register";
 
     useEffect(() => {
         const getUser = async () => {
@@ -84,7 +90,7 @@ export function Navbar() {
 
     return (
         <nav className={cn(
-            "border-b bg-sky-200 dark:bg-background sticky top-0 z-50 transition-transform duration-300",
+            "border-b bg-sky-300 dark:bg-background sticky top-0 z-50 transition-transform duration-300",
             isVisible ? "translate-y-0" : "-translate-y-full"
         )}>
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -163,14 +169,19 @@ export function Navbar() {
                             </DropdownMenu>
                         </div>
                     ) : (
-                        <>
-                            <AuthModal>
-                                <Button className="cursor-pointer">Login / Sign Up</Button>
-                            </AuthModal>
-                        </>
+                        <div className="flex items-center gap-4">
+                            {!isAuthPage && (
+                                <Button asChild className="cursor-pointer rounded-xl bg-white text-blue-600 hover:bg-blue-50 dark:bg-white dark:text-blue-900 dark:hover:bg-blue-50 shadow-sm hover:shadow-md border border-blue-100 dark:border-transparent transition-all duration-300 hover:-translate-y-0.5 px-6">
+                                    <Link href="/login" scroll={false}>
+                                        Login
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
+
         </nav>
     );
 }

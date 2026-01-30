@@ -66,7 +66,7 @@ export default function AboutPage() {
                     </ul>
                     <p className="text-lg">
                         Instead of pushing students forward blindly, NeetStand encourages
-                        them to <strong>pause, analyze, and fix</strong> what is holding
+                        them to <strong>pause, identify, and fix</strong> what is holding
                         them back.
                     </p>
                     <p className="text-lg font-semibold italic">
