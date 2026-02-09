@@ -88,6 +88,7 @@ const RotatingTriangle = ({ isDark, scale = 1 }: { isDark: boolean; scale?: numb
 const TypewriterText = ({ text, isDark }: { text: string; isDark: boolean }) => {
     const [displayText, setDisplayText] = useState('');
     const [index, setIndex] = useState(0);
+    const [showCursor, setShowCursor] = useState(true);
 
     useEffect(() => {
         if (index < text.length) {
@@ -96,6 +97,12 @@ const TypewriterText = ({ text, isDark }: { text: string; isDark: boolean }) => 
                 setIndex(index + 1);
             }, 80);
             return () => clearTimeout(timeout);
+        } else {
+            // Text finished typing, hide cursor after a delay
+            const cursorTimeout = setTimeout(() => {
+                setShowCursor(false);
+            }, 500);
+            return () => clearTimeout(cursorTimeout);
         }
     }, [index, text]);
 
@@ -111,7 +118,9 @@ const TypewriterText = ({ text, isDark }: { text: string; isDark: boolean }) => 
             {displayText}
             <span style={{
                 animation: 'blink 1s infinite',
-                marginLeft: '4px'
+                marginLeft: '4px',
+                opacity: showCursor ? 1 : 0,
+                transition: 'opacity 0.3s ease'
             }}>|</span>
         </h3>
     );
