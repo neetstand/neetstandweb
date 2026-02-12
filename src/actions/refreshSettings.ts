@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 
 export async function refreshSettings() {
     try {
-        revalidateTag("settings");
+        revalidateTag("settings", { expire: 0 });
         return { errors: null };
     } catch (error) {
         console.error("Failed to refresh settings:", error);
