@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { getSettings } from "@/lib/getSettings";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
   },
 };
 
-import { createClient } from "@/utils/supabase/server";
+
 import { Maintenance } from "@/components/Maintenance";
 
 export default async function RootLayout({
@@ -26,8 +27,13 @@ export default async function RootLayout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const { data: isMaintenance } = await supabase.rpc("is_maintenance_mode");
+  const { maintenance_mode }: Record<string, string> = await getSettings()
+
+  console.log(maintenance_mode, "maintenance_mode")
+
+  const isMaintenance = maintenance_mode === "true";
+
+  console.log(isMaintenance, "isMaintenance")
 
   if (isMaintenance) {
     return (

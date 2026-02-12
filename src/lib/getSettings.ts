@@ -1,24 +1,17 @@
 
-import { createClient } from "@supabase/supabase-js";
-import { revalidateTag, unstable_cache } from "next/cache";
+
+import { createStaticClient } from "@/utils/supabase/server";
+import { cacheLife, cacheTag } from "next/cache";
+import { AppConfig, AppConfigType } from "./constants";
 
 export type Settings = Record<string, string>;
 
-async function fetchSettingsFromDB(): Promise<Settings> {
-    // Use Service Role Key for server-side trusted fetching
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export async function getSettings(): Promise<Settings> {
+    "use cache";
+    cacheLife('adminControlledYear');
+    cacheTag("settings");
 
-    if (!supabaseUrl || !supabaseKey) {
-        console.error("Missing Supabase credentials in getSettings (NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY)");
-        return {};
-    }
-
-    // Direct Supabase client to bypass RLS and Auth context issues on server
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-        auth: { persistSession: false }
-    });
-
+    const supabase = await createStaticClient();
     try {
         const { data, error } = await supabase.from("settings").select("*");
 
@@ -27,39 +20,21 @@ async function fetchSettingsFromDB(): Promise<Settings> {
             return {};
         }
 
-        const settings: Settings = {};
-        if (data) {
-            // console.log("Settings fetching: Found " + data.length + " rows");
-            for (const row of data) {
-                // Using 'key' based on user's previous snippet, falling back to 'variable' if schema differs
-                const key = row.key || row.variable;
-                // console.log("Settings fetching: Row key=" + key + ", value=" + row.value);
-                if (key && row.value !== null) {
-                    settings[key] = row.value;
-                }
-            }
-        } else {
-            // console.log("Settings fetching: No data found");
+        const dbSettings: Record<string, string> = {};
+        for (const row of data) {
+            dbSettings[row.variable] = row.value;
         }
+
+        const settings: AppConfigType & Record<string, string> = {
+            ...AppConfig,
+            ...dbSettings
+        }
+
         return settings;
+
     } catch (err) {
         console.error("Exception fetching settings:", err);
-        return {};
+        return AppConfig;
     }
 }
 
-export const getSettings = unstable_cache(
-    async () => {
-        return await fetchSettingsFromDB();
-    },
-    ['settings-key'],
-    { tags: ['settings'] }
-);
-
-/**
- * Updates the cache tag for settings.
- * This should be called by the refresh API route.
- */
-export async function updateSettingsCache() {
-    revalidateTag("settings");
-}
