@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,12 +44,62 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
     const [country, setCountry] = useState("+91");
 
     const [isLoading, setIsLoading] = useState(false);
-    const [otpToken, setOtpToken] = useState("");
+
+    // Store info needed for verification
+    const [verificationInfo, setVerificationInfo] = useState<{
+        identifier: string; // Phone or Email
+        type: "sms" | "phone_change" | "email";
+    } | null>(null);
 
     // Helper to determine type
     const isPhone = (val: string) => /^\d+$/.test(val);
 
+    // Timer for resend
+    const [timeLeft, setTimeLeft] = useState(60);
+
+    // Effect for timer
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (step === "OTP_VERIFY" && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [step, timeLeft]);
+
+    // Reset timer when step changes to OTP_VERIFY
+    useEffect(() => {
+        if (step === "OTP_VERIFY") {
+            setTimeLeft(60);
+        }
+    }, [step]);
+
+
     // -- Handlers --
+
+    const handleResendOtp = async () => {
+        if (!verificationInfo) return;
+        setIsLoading(true);
+        try {
+            if (verificationInfo.type === "phone_change") {
+                const res = await registerUser(emailInput, verificationInfo.identifier);
+                if (res.error) throw new Error(res.error);
+                toast.success("Code resent successfully");
+            } else {
+                const isPhoneType = verificationInfo.type !== "email";
+                const res = await sendCustomOtp(verificationInfo.identifier, isPhoneType);
+                if (res.error) throw new Error(res.error);
+                toast.success("Code resent successfully");
+            }
+            setTimeLeft(60);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "Failed to resend code";
+            toast.error(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleContinue = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,17 +125,25 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                 }
             }
 
-            // Check Status
+            // Check Status (This also sends OTP if user exists via signInWithOtp)
             const status = await checkUserStatus(checkVal, isPhoneInput);
 
             if (status.exists) {
-                // User Exists -> Send OTP
-                const res = await sendCustomOtp(checkVal, isPhoneInput);
-                if (res.error || !res.token) {
-                    throw new Error(res.error || "Failed to send OTP");
-                }
-                setOtpToken(res.token);
-                toast.success(res.message);
+                // OTP sent automatically by checkUserStatus (which calls signInWithOtp)
+                // or user is logged in (session check).
+                // If logged in, we might not need OTP?
+                // checkUserStatus returns { exists: true }.
+                // If they are logged in, effectively they are authenticated.
+                // But this flow is "Login". If they are already logged in, why are they here?
+                // Probably strictly checking input.
+
+                // If we relied on signInWithOtp, OTP is sent.
+                setVerificationInfo({
+                    identifier: checkVal,
+                    type: isPhoneInput ? "sms" : "email"
+                });
+
+                toast.success("OTP Sent");
                 setStep("OTP_VERIFY");
             } else {
                 // New User -> Collect Missing Info
@@ -120,13 +178,26 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
             // Custom registration logic: Create User -> Send OTP
 
             const res = await registerUser(finalEmail, finalPhone);
-            if (res.error || !res.token) {
-                throw new Error(res.error || "Failed to send OTP");
+            if (res.error) {
+                throw new Error(res.error || "Failed to update profile");
             }
 
-            setOtpToken(res.token);
-            toast.success("Registration started. OTP sent to email.");
-            setStep("OTP_VERIFY");
+            if (res.verifying) {
+                setVerificationInfo({
+                    identifier: finalPhone, // Usually verifying phone change or signup phone
+                    type: res.verificationType || "sms"
+                });
+                toast.success(res.message || "OTP sent");
+                setStep("OTP_VERIFY");
+                return;
+            }
+
+            if (res.redirect || res.success) {
+                toast.success("Profile updated!");
+                router.refresh();
+                router.push("/dashboard");
+                return;
+            }
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Registration failed";
@@ -139,30 +210,39 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
     const handleVerifyOtp = async (otp: string) => {
         setIsLoading(true);
         try {
-            const res = await verifyCustomOtp(otpToken, otp);
-            if (res.error || !res.actionLink) {
-                throw new Error(res.error || "Verification failed");
+            if (!verificationInfo) throw new Error("Missing verification info");
+
+            let verifyParams;
+            if (verificationInfo.type === 'email') {
+                verifyParams = {
+                    email: verificationInfo.identifier,
+                    token: otp,
+                    type: 'email' as const
+                };
+            } else {
+                verifyParams = {
+                    phone: verificationInfo.identifier,
+                    token: otp,
+                    type: verificationInfo.type as "sms" | "phone_change"
+                };
+            }
+
+            const { error } = await supabase.auth.verifyOtp(verifyParams);
+
+            if (error) {
+                throw error;
             }
 
             toast.success("Login Successful");
 
-            // Redirect using the magic link which will set the session
-            // We use router.push or window.location? 
-            // Magic Link is usually a full URL.
-            // But verifyCustomOtp generated a link. API returns `action_link` which contains the token.
-            // Actually, `generateLink` returns a URL. 
-            // We can just visit it.
-
-            // Note: Since we are Client Side, we can't just `fetch` it to set cookie if it's external link?
-            // But since it's same domain (Supabase config), usually we need to navigate to it.
-            // Wait, hitting the link works.
-
-            window.location.href = res.actionLink;
+            // Refresh session/router
+            router.refresh(); // Update server components
+            router.push("/dashboard");
 
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : "Invalid Code";
             toast.error(errorMessage);
-            setIsLoading(false); // Only stop loading on error, success navigates
+            setIsLoading(false);
         }
     };
 
@@ -303,7 +383,7 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                             </div>
 
                             <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? <Loader2 className="animate-spin" /> : "Verify & Login"}
+                                {isLoading ? <Loader2 className="animate-spin" /> : (isEmailVerified ? "Your Contact Phone Number" : "Verify & Login")}
                             </Button>
                             <Button type="button" variant="ghost" className="w-full" onClick={() => {
                                 setIsEmailVerified(false);
@@ -312,21 +392,34 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                         </form>
                     )}
 
+
                     {step === "OTP_VERIFY" && (
                         <div className="space-y-4">
                             <Input
                                 type="text"
-                                placeholder="123456"
-                                className="text-center text-2xl tracking-[1em]"
+                                placeholder="ENTER CODE"
+                                className="text-center text-xl tracking-widest uppercase"
                                 maxLength={6}
                                 onChange={(e) => {
                                     if (e.target.value.length === 6) handleVerifyOtp(e.target.value);
                                 }}
                             />
+
+                            <div className="text-center text-sm">
+                                {timeLeft > 0 ? (
+                                    <span className="text-muted-foreground">
+                                        Resend code in {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                                    </span>
+                                ) : (
+                                    <Button variant="link" className="p-0 h-auto text-sky-600 dark:text-sky-400" onClick={handleResendOtp} disabled={isLoading}>
+                                        Resend Code
+                                    </Button>
+                                )}
+                            </div>
+
                             <Button variant="ghost" className="w-full" onClick={() => setStep("INPUT")}>Cancel</Button>
                         </div>
                     )}
-
                 </div>
             </div>
         </div>

@@ -9,21 +9,17 @@ export async function GET(request: Request) {
 
     if (code) {
         const supabase = await createClient();
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-        if (!error) {
-            // Check if user profile exists
-            const { data: { user } } = await supabase.auth.getUser();
-
+        if (!error && data?.user) {
+            const user = data.user;
             if (user) {
-                const { data: profile } = await supabase
-                    .from('user_profiles')
-                    .select('id')
-                    .eq('id', user.id)
-                    .single();
+                // Check if user has a phone number (either in metadata or phone column)
+                // We use metadata 'phone_number' for our safe updates, or 'phone' if system managed.
+                const hasPhone = user.phone || user.user_metadata?.phone_number;
 
-                if (!profile) {
-                    // Start new user flow - assume OAuth provides email
+                if (!hasPhone) {
+                    // Missing Phone -> Collect it
                     return NextResponse.redirect(`${origin}/login?step=COLLECT_PHONE&email=${encodeURIComponent(user.email || '')}`);
                 }
             }
