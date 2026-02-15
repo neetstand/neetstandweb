@@ -16,23 +16,29 @@ interface AuthCoreProps {
     onSuccess?: () => void;
     isModal?: boolean;
     initialView?: "phone" | "email" | "register";
+    initialStep?: AuthStep;
+    prefilledEmail?: string;
 }
 
 type AuthStep = "INPUT" | "COLLECT_INFO" | "OTP_VERIFY";
 
-function AuthCoreContent({ onSuccess, isModal = false }: AuthCoreProps) {
+function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEmail }: AuthCoreProps) {
     const router = useRouter();
     const supabase = createClient();
 
     // -- State --
-    const [step, setStep] = useState<AuthStep>("INPUT");
+    const [step, setStep] = useState<AuthStep>(initialStep || "INPUT");
 
     // Unified input state
     const [identifier, setIdentifier] = useState("");
 
     // For Collection Step
     const [phoneInput, setPhoneInput] = useState("");
-    const [emailInput, setEmailInput] = useState("");
+    const [emailInput, setEmailInput] = useState(prefilledEmail || "");
+
+    // Lock email if prefilled (coming from OAuth)
+    const [isEmailVerified, setIsEmailVerified] = useState(!!prefilledEmail);
+
 
     // Country code for Phone
     const [country, setCountry] = useState("+91");
@@ -276,8 +282,7 @@ function AuthCoreContent({ onSuccess, isModal = false }: AuthCoreProps) {
                                         type="email"
                                         value={emailInput}
                                         onChange={(e) => setEmailInput(e.target.value)}
-                                        disabled={identifier.includes("@") && isLoading} // Disable if it was the initial input? Maybe not, allow edit?
-                                    // Actually if identifier was email, we should prefill and maybe valid
+                                        disabled={isEmailVerified || (identifier.includes("@") && isLoading)}
                                     />
                                 </div>
 
@@ -300,7 +305,10 @@ function AuthCoreContent({ onSuccess, isModal = false }: AuthCoreProps) {
                             <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading ? <Loader2 className="animate-spin" /> : "Verify & Login"}
                             </Button>
-                            <Button type="button" variant="ghost" className="w-full" onClick={() => setStep("INPUT")}>Back</Button>
+                            <Button type="button" variant="ghost" className="w-full" onClick={() => {
+                                setIsEmailVerified(false);
+                                setStep("INPUT");
+                            }}>Back</Button>
                         </form>
                     )}
 

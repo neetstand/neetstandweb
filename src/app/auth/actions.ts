@@ -71,9 +71,10 @@ export async function verifyCustomOtp(token: string, otp: string) {
 }
 
 export async function registerUser(email: string, phone: string) {
-    const supabase = createAdminClient();
 
     try {
+        const supabase = createAdminClient();
+
         const { data, error } = await supabase.auth.admin.createUser({
             email,
             phone,

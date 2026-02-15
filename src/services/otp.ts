@@ -19,10 +19,12 @@ interface VerifyOtpResult {
 
 export class OtpService {
     static async send(identifier: string, isPhone: boolean): Promise<SendOtpResult> {
-        const supabase = createAdminClient();
         let targetEmail = "";
 
+
         try {
+            const supabase = createAdminClient();
+
             if (isPhone) {
                 // Find user to get email
                 const { data: { users }, error } = await supabase.auth.admin.listUsers();
@@ -76,9 +78,11 @@ export class OtpService {
     }
 
     static async verify(token: string, otp: string): Promise<VerifyOtpResult> {
-        const supabase = createAdminClient();
+
 
         try {
+            const supabase = createAdminClient();
+
             // Verify Token
             const { payload } = await jwtVerify(token, JWT_SECRET);
             const { otpHash, email } = payload as { otpHash: string; email: string; phone?: string };

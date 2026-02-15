@@ -217,9 +217,9 @@ export const Hero = () => {
                                 </motion.div>
 
                                 <motion.div className="text-xl text-sky-800 dark:text-slate-400" variants={item}>
-                                    <p className="mb-2"><span className="dark:text-blue-300">Pause</span> blind practice.</p>
-                                    <p className="mb-2">Identify your mistakes.</p>
-                                    <p>Move forward with NCERT-focused precision.</p>
+                                    <p className="mb-2"><span className="dark:text-blue-300">Don't</span> just practice.</p>
+                                    <p className="mb-2">Pinpoint your mistakes.</p>
+                                    <p>Fix them and improve your score.</p>
                                 </motion.div>
 
                                 <motion.div variants={item}>
@@ -280,8 +280,8 @@ export const Hero = () => {
                                 transition={{ delay: 0.5, duration: 0.6 }}
                             >
                                 <div className="text-lg text-sky-800 dark:text-slate-400 mb-6 font-medium">
-                                    <p className="mb-2"><span className="dark:text-blue-400">Pause</span> blind practice. Identify your mistakes.</p>
-                                    <p>Move forward with NCERT-focused precision.</p>
+                                    <p className="mb-2"><span className="dark:text-blue-400">Don't</span> just practice. Pinpoint mistakes.</p>
+                                    <p>Fix them and improve your score.</p>
                                 </div>
 
                                 <button className="cursor-pointer px-8 py-3 rounded-lg font-semibold bg-emerald-600 dark:bg-emerald-500 text-white hover:scale-105 transition-transform shadow-lg">
@@ -303,18 +303,12 @@ export const Hero = () => {
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-3xl font-bold mb-8 text-center">Why most NEET aspirants feel stuck</h2>
                         <div className="max-w-5xl mx-auto bg-white dark:bg-slate-700 border border-sky-300 dark:border-slate-600 rounded-xl p-8">
-                            <ul className="mb-6 text-sky-800 dark:text-slate-400 space-y-3">
-                                <li>• You practice daily</li>
-                                <li>• You revise repeatedly</li>
-                                <li>• But your score barely moves</li>
-                            </ul>
                             <p className="text-lg mb-6">
-                                Because NEET doesn't reward <strong>more questions</strong> — it rewards <strong className="text-emerald-600">correcting the right mistakes</strong>.
+                                Most students practice blindly — they solve questions without knowing why they keep losing marks.
                             </p>
                             <div className="bg-sky-200 dark:bg-slate-800 p-6 rounded-lg">
                                 <p className="text-lg">
-                                    Most platforms push you forward.<br />
-                                    NEETStand tells you <strong className="text-emerald-600">when to stop and fix things</strong>.
+                                    More questions won’t raise your NEET score — <strong className="text-emerald-600">correcting the right mistakes will.</strong>
                                 </p>
                             </div>
                         </div>
@@ -327,9 +321,15 @@ export const Hero = () => {
                     {...fadeInUp}
                 >
                     <div className="max-w-7xl mx-auto px-6">
-                        <h2 className="text-3xl font-bold mb-8 text-center">At NEETStand, you get:</h2>
+                        <h2 className="text-3xl font-bold mb-8 text-center">At NeetStand, you get:</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                            {['Mistake-based question selection', 'NCERT-linked explanations', 'Clear guidance on what to revise next', 'Focus on score improvement, not volume'].map((f, i) => (
+                            {[
+                                'A diagnostic-first score gap analysis',
+                                'Mistake-based revision plan, not random MCQs',
+                                'NCERT-aligned explanations tied to your weak areas',
+                                'Structured timeline that fits March–May revision',
+                                'Weekly mock tests + focused fix packs'
+                            ].map((f, i) => (
                                 <div className="bg-white dark:bg-slate-700 border border-sky-300 dark:border-slate-600 rounded-xl p-8" key={i}>
                                     <CheckCircle className="text-emerald-600 mb-3" size={32} />
                                     <h3 className="text-xl font-semibold">{f}</h3>
@@ -352,9 +352,9 @@ export const Hero = () => {
                         <h2 className="text-3xl font-bold mb-8 text-center">How It Works</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
-                                { num: 1, icon: Target, title: 'Stop & Diagnose', desc: 'Take a diagnostic test to uncover:', list: ['Weak chapters', 'Repeated conceptual errors', 'NCERT gaps'] },
-                                { num: 2, icon: BookOpen, title: 'Sit & Practice Smart', desc: 'Practice questions chosen based on your mistakes, not randomly.' },
-                                { num: 3, icon: ArrowUp, title: 'Move Forward Confidently', desc: 'After every session, know:', list: ['What to revise today', 'What to stop over-practicing', 'Where your marks are leaking'] }
+                                { num: 1, icon: Target, title: 'Diagnose', desc: 'Take a free full-length diagnostic test to uncover weak chapters and repeated errors.' },
+                                { num: 2, icon: BookOpen, title: 'Practice Smart', desc: 'Get targeted practice and fixes selected based on your mistakes, not by topic volume.' },
+                                { num: 3, icon: ArrowUp, title: 'Improve Fast', desc: 'Know exactly what to revise next, where marks leak, and what mock to take.' }
                             ].map(s => {
                                 const Icon = s.icon;
                                 return (
@@ -363,7 +363,7 @@ export const Hero = () => {
                                         <Icon className="mx-auto mb-4 text-emerald-600" size={48} />
                                         <h3 className="text-xl font-semibold mb-4">{s.title}</h3>
                                         <p className="text-sky-800 dark:text-slate-400 mb-4">{s.desc}</p>
-                                        {s.list && <ul className="text-sky-800 dark:text-slate-400 text-left space-y-2">{s.list.map((l, i) => <li key={i}>• {l}</li>)}</ul>}
+
                                     </div>
                                 );
                             })}
@@ -377,15 +377,14 @@ export const Hero = () => {
                     {...fadeInUp}
                 >
                     <div className="max-w-7xl mx-auto px-6">
-                        <h2 className="text-3xl font-bold mb-8 text-center">Example feedback you'll see:</h2>
+                        <h2 className="text-3xl font-bold mb-8 text-center">Insight you’ll see after a test:</h2>
                         <div className="max-w-4xl mx-auto bg-white dark:bg-slate-700 border border-sky-300 dark:border-slate-600 border-l-4 border-l-orange-600 rounded-xl p-8">
                             <div className="flex gap-4">
                                 <TrendingUp className="text-orange-600 flex-shrink-0" size={32} />
                                 <div>
                                     <p className="text-lg mb-4 italic">
-                                        "You lost 5 marks due to confusion between similar Biology terms. Revise NCERT Chapter 12, paragraph 3-4."
+                                        “You lost marks due to conceptual confusion between similar terms in Biology. Revise NCERT Chapter XX (paragraph 3–4), then retry related questions.”
                                     </p>
-                                    <p className="font-bold text-emerald-600">This is <strong>direction</strong>, not just analytics.</p>
                                 </div>
                             </div>
                         </div>
@@ -402,9 +401,9 @@ export const Hero = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                             <div className="bg-white dark:bg-slate-700 border border-sky-300 dark:border-slate-600 rounded-xl p-8">
                                 <h3 className="text-2xl mb-6 font-bold text-emerald-600 flex items-center">
-                                    <CheckCircle className="mr-3" size={32} />Perfect For
+                                    <CheckCircle className="mr-3" size={32} />Ideal for:
                                 </h3>
-                                {['Serious NEET aspirants', 'Repeaters aiming for score jump', 'Students tired of random MCQs'].map((t, i) => (
+                                {['Final-phase NEET 2026 aspirants', 'Repeaters looking for a last score jump', 'Students tired of random MCQ practice'].map((t, i) => (
                                     <div key={i} className="flex mb-4 items-center">
                                         <CheckCircle className="text-emerald-600 mr-3 flex-shrink-0" size={20} />
                                         <span>{t}</span>
@@ -413,9 +412,9 @@ export const Hero = () => {
                             </div>
                             <div className="bg-white dark:bg-slate-700 border border-sky-300 dark:border-slate-600 rounded-xl p-8">
                                 <h3 className="text-2xl mb-6 font-bold text-orange-600 flex items-center">
-                                    <XCircle className="mr-3" size={32} />Not For
+                                    <XCircle className="mr-3" size={32} />Not for:
                                 </h3>
-                                {['Casual browsing', 'Syllabus completion alone'].map((t, i) => (
+                                {['Casual browsing', 'Feature-only platforms without clear fix plans'].map((t, i) => (
                                     <div key={i} className="flex mb-4 items-center">
                                         <XCircle className="text-orange-600 mr-3 flex-shrink-0" size={20} />
                                         <span>{t}</span>
@@ -439,7 +438,7 @@ export const Hero = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                             <div className="bg-white dark:bg-slate-700 border-2 border-sky-300 dark:border-slate-600 rounded-xl p-8">
                                 <h3 className="text-2xl font-bold mb-2">FREE STAND</h3>
-                                <p className="text-sky-800 dark:text-slate-400 mb-6">Perfect to understand your weak areas</p>
+                                <p className="text-sky-800 dark:text-slate-400 mb-6">Start with the Free Diagnostic. Upgrade only when you see improvement.</p>
                                 {['Diagnostic Test', 'Limited daily practice', 'Basic performance summary'].map((f, i) => (
                                     <div key={i} className="flex items-center mb-3">
                                         <CheckCircle className="text-emerald-600 mr-3" size={20} />
@@ -477,14 +476,14 @@ export const Hero = () => {
                 >
                     <div className="max-w-4xl mx-auto px-6 text-center">
                         <h2 className="text-3xl md:text-5xl font-bold mb-8">
-                            Start Free. Upgrade Only If You See Improvement.
+                            Start with the Free Diagnostic. Upgrade only when you see improvement.
                         </h2>
                         <button className="cursor-pointer inline-flex items-center gap-3 px-10 py-5 text-xl rounded-lg font-semibold bg-emerald-600 text-white hover:scale-105 transition-transform shadow-lg">
-                            <span>Take Free Diagnostic Test</span>
+                            <span>👉 Take Free Diagnostic Test</span>
                             <ArrowRight size={24} />
                         </button>
-                        <p className="text-sky-800 dark:text-slate-400 mt-6">
-                            No credit card required. See results immediately.
+                        <p className="text-sky-800 dark:text-slate-400 mt-6 font-medium">
+                            NeetStand is focused on performance improvement — not random questions. Get direction that moves your score.
                         </p>
                     </div>
                 </motion.section>

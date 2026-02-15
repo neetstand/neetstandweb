@@ -30,6 +30,8 @@ export async function getSettings(): Promise<Settings> {
             ...dbSettings
         }
 
+        console.log("getSettings loaded. Maintenance Mode:", settings["maintenance_mode"]);
+
         return settings;
 
     } catch (err) {

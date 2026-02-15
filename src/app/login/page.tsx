@@ -1,14 +1,29 @@
 "use client";
 
 import { AuthCore } from "@/components/auth/AuthCore";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { WavyBackground } from "@/components/WavyBackground";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+
+function LoginContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const stepParam = searchParams.get("step");
+    const emailParam = searchParams.get("email");
+
+    return (
+        <AuthCore
+            onSuccess={() => router.push("/dashboard")}
+            isModal={false}
+            initialStep={stepParam === "COLLECT_PHONE" ? "COLLECT_INFO" : undefined}
+            prefilledEmail={emailParam || undefined}
+        />
+    );
+}
 
 export default function LoginPage() {
-    const router = useRouter();
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
@@ -29,10 +44,9 @@ export default function LoginPage() {
             className="w-full flex items-center justify-center"
         >
             <div className="w-full max-w-[850px] h-[600px] md:h-[500px] relative z-10">
-                <AuthCore
-                    onSuccess={() => router.push("/dashboard")}
-                    isModal={false}
-                />
+                <Suspense fallback={<div>Loading...</div>}>
+                    <LoginContent />
+                </Suspense>
             </div>
         </WavyBackground>
     );
