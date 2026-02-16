@@ -70,16 +70,15 @@ export const Footer = () => {
                     {
                         title: "Resources",
                         links: [
-                            { label: "Blog", href: "#" },
                             { label: "About Us", href: "/about" },
-                            { label: "Contact", href: "#" },
+                            { label: "Contact Us", href: "/contact" },
                         ],
                     },
                     {
                         title: "Legal",
                         links: [
-                            { label: "Privacy Policy", href: "#" },
-                            { label: "Terms of Service", href: "#" },
+                            { label: "Privacy Policy", href: "/privacy" },
+                            { label: "Terms of Service", href: "/terms" },
                         ],
                     },
                 ].map((col, i) => (
