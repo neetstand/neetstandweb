@@ -139,8 +139,8 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
 
                 // If we relied on signInWithOtp, OTP is sent.
                 setVerificationInfo({
-                    identifier: checkVal,
-                    type: isPhoneInput ? "sms" : "email"
+                    identifier: status.email || checkVal, // Use email if found via lookup
+                    type: status.identifierType === "email" ? "email" : (isPhoneInput ? "sms" : "email")
                 });
 
                 toast.success("OTP Sent");
@@ -184,10 +184,12 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
 
             if (res.verifying) {
                 setVerificationInfo({
-                    identifier: finalPhone, // Usually verifying phone change or signup phone
+                    identifier: res.verificationType === "email" ? finalEmail : finalPhone,
                     type: res.verificationType || "sms"
                 });
                 toast.success(res.message || "OTP sent");
+
+                // If it's email verification, ensure we step to OTP
                 setStep("OTP_VERIFY");
                 return;
             }
@@ -235,9 +237,8 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
 
             toast.success("Login Successful");
 
-            // Refresh session/router
-            router.refresh(); // Update server components
-            router.push("/dashboard");
+            // Force hard navigation to ensure fresh session state
+            window.location.href = "/dashboard";
 
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : "Invalid Code";
@@ -399,9 +400,9 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                                 type="text"
                                 placeholder="ENTER CODE"
                                 className="text-center text-xl tracking-widest uppercase"
-                                maxLength={6}
+                                maxLength={8}
                                 onChange={(e) => {
-                                    if (e.target.value.length === 6) handleVerifyOtp(e.target.value);
+                                    if (e.target.value.length === 8) handleVerifyOtp(e.target.value);
                                 }}
                             />
 
