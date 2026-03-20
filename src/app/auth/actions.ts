@@ -42,52 +42,20 @@ export async function checkUserStatus(identifier: string, isPhone: boolean = fal
             }
         }
 
-        // 2. Lookup Logic
+        // 2. Lookup Logic (Restored)
         if (isPhone) {
             // Use RPC to find email by phone
             const { data, error } = await supabase.rpc('lookup_user_by_phone', { p_phone: identifier });
 
             if (error) {
                 console.error("Lookup Error:", error);
-                // Fallback to standard check if RPC fails
             } else if (data && data.found) {
                 if (data.multiple) {
-                    // Ambiguous -> Treat as "User not found" to force collection/clarification?
-                    // Or returns exists: false effectively.
+                    // Ambiguous -> User must enter email manually
                     return { exists: false, identifierType: "phone", isIndia };
                 }
 
                 // Found unique user -> Send OTP to Email
-                // returning exists: true means AuthCore will try to send OTP.
-                // But AuthCore thinks "phone" input means "send SMS".
-                // We need to tell AuthCore to use EMAIL for OTP?
-
-                // Check sendCustomOtp logic in AuthCore:
-                // if (isPhoneType) sendCustomOtp...
-
-                // Wait, if we return exists: true, AuthCore does:
-                /*
-                 setVerificationInfo({
-                    identifier: checkVal,
-                    type: isPhoneInput ? "sms" : "email"
-                });
-                */
-                // If type is "sms", it tries to send SMS.
-                // We need to return info that says "User exists, but verify via EMAIL".
-
-                // We can't change UserStatus return type easily without breaking UI?
-                // Let's check AuthCore usage.
-                // It uses `status.exists`.
-                // We might need to trigger the email OTP *here* and return a flag?
-
-                // Actually, `checkUserStatus` is called. If exists, `AuthCore` sets `OTP_VERIFY`.
-                // But before that, `AuthCore` assumes `type` based on input.
-
-                // We need to support `lookupEmail` in return?
-
-                // Let's modify UserStatus type first? 
-                // Or let's just trigger the OTP to the EMAIL here?
-
                 const email = data.email;
                 const { error: otpError } = await supabase.auth.signInWithOtp({
                     email: email,
@@ -95,29 +63,11 @@ export async function checkUserStatus(identifier: string, isPhone: boolean = fal
                 });
 
                 if (!otpError) {
-                    // Only way to tell AuthCore to verify 'email' is to return it?
-                    // But `checkUserStatus` return is fixed.
-
-                    // HACK: We can return `identifierType: "email"` even if input was phone?
-                    // If we return identifierType: "email", AuthCore might set verificationInfo type to "email"?
-                    // Let's check AuthCore:
-                    /*
-                    if (status.exists) {
-                        setVerificationInfo({
-                            identifier: checkVal, // This is the PHONE number input
-                            type: isPhoneInput ? "sms" : "email"
-                        });
-                    }
-                    */
-                    // It calculates type from `isPhoneInput` (local state), ignoring server return `identifierType`.
-
-                    // So we MUST update AuthCore to respect the server's hint.
-
                     return {
                         exists: true,
-                        identifierType: "email", // Signal that we found an email
+                        identifierType: "email", // Signal valid email found
                         isIndia,
-                        email // We need to add this property to UserStatus
+                        email // Return matched email
                     } as any;
                 }
             }
@@ -173,30 +123,7 @@ export async function checkUserStatus(identifier: string, isPhone: boolean = fal
     }
 }
 
-// Deprecated/Modified: Just wraps signInWithOtp
-export async function sendCustomOtp(identifier: string, isPhone: boolean) {
-    const supabase = await createClient();
-    try {
-        // Attempt to send OTP. If Phone and no SMS provider, this will fail.
-        // We catch it and throw a clearer error?
-        // But sendCustomOtp is only called if checkUserStatus says "Exists".
-        // If checkUserStatus passed (meaning SMS worked or Email worked), this should work.
-        const { error } = await supabase.auth.signInWithOtp({
-            [isPhone ? "phone" : "email"]: identifier,
-            options: { shouldCreateUser: true }
-        } as any);
 
-        if (error) throw error;
-        return { success: true, message: "OTP sent successfully" };
-    } catch (e: any) {
-        return { error: e.message };
-    }
-}
-
-// Deprecated: Client should use supabase.auth.verifyOtp directly
-export async function verifyCustomOtp(token: string, otp: string) {
-    return { error: "Please use client-side verifyOtp" };
-}
 
 export async function registerUser(email: string, phone: string): Promise<RegisterResult> {
     const supabase = await createClient();

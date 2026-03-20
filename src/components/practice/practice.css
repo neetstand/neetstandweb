@@ -1,0 +1,900 @@
+/* ═══════════════════════════════════════════════════════════
+   Practice Session — Component Styles
+   Scope: .ps-* (session), .pq-* (question card), .practice-carousel
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Shared tokens ──────────────────────────────────────────── */
+:root {
+  --ps-radius: 1rem;
+  --ps-gap: 1.25rem;
+  --ps-easy: #22c55e;
+  --ps-medium: #f59e0b;
+  --ps-hard: #ef4444;
+  --ps-correct: #16a34a;
+  --ps-wrong: #dc2626;
+  --ps-correct-bg: #dcfce7;
+  --ps-wrong-bg: #fee2e2;
+  --ps-border: hsl(var(--border, 214 32% 91%));
+  --ps-surface: hsl(var(--card, 0 0% 100%));
+  --ps-muted: hsl(var(--muted-foreground, 215 16% 47%));
+}
+
+.dark {
+  --ps-correct-bg: #14532d;
+  --ps-wrong-bg: #450a0a;
+}
+
+@keyframes ps-fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Session States
+   ═══════════════════════════════════════════════════════════ */
+
+
+.ps-idle,
+.ps-loading,
+.ps-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.ps-idle__icon {
+  color: hsl(var(--primary, 221 83% 53%));
+}
+
+.ps-idle__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.ps-idle__sub {
+  color: var(--ps-muted);
+  margin: 0;
+}
+
+.ps-loading__spinner {
+  animation: ps-spin 0.8s linear infinite;
+  color: hsl(var(--primary, 221 83% 53%));
+}
+
+@keyframes ps-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ps-error__icon {
+  color: var(--ps-wrong);
+}
+
+.ps-error__message {
+  max-width: 36rem;
+  color: var(--ps-wrong);
+}
+
+/* ─ Shared buttons ─ */
+.ps-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.ps-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.ps-btn:active {
+  transform: translateY(0);
+}
+
+.ps-btn--primary {
+  background: hsl(var(--primary, 221 83% 53%));
+  color: #fff;
+}
+
+.ps-btn--secondary {
+  background: var(--ps-border);
+  color: hsl(var(--foreground, 222 47% 11%));
+}
+
+.ps-btn--ghost {
+  background: transparent;
+  color: var(--ps-muted);
+  border: 1px solid var(--ps-border);
+  font-size: 0.82rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.ps-btn--ghost:hover {
+  background: var(--ps-border);
+  opacity: 1;
+  color: hsl(var(--foreground));
+}
+
+.ps-topbar__new-set {
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Active Session
+   ═══════════════════════════════════════════════════════════ */
+
+.ps-session {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-gap);
+}
+
+/* Fullscreen toggle row — sits above the progress bar */
+.ps-session__fs-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ps-session__fs-btn {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.8rem;
+  gap: 0.35rem;
+}
+
+/* ─ Modal Portal Overlay ─ */
+.ps-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  animation: ps-fadein 0.18s ease;
+}
+
+/* Modal panel */
+.ps-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100vw;
+  background: hsl(var(--card, 0 0% 100%));
+  overflow: hidden;
+}
+
+.dark .ps-modal {
+  background: hsl(217 33% 10%);
+}
+
+/* Modal sticky header — topic title + close button */
+.ps-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--ps-border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: hsl(var(--card, 0 0% 100%));
+}
+
+.dark .ps-modal__header {
+  background: hsl(217 33% 10%);
+}
+
+.ps-modal__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+  margin: 0;
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+
+.ps-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--ps-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ps-modal__close:hover {
+  background: var(--ps-border);
+  color: hsl(var(--foreground));
+}
+
+/* Scrollable modal body */
+.ps-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* ─ Top bar ─ */
+.ps-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--ps-surface);
+}
+
+.ps-topbar__counter {
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: hsl(var(--foreground));
+}
+
+.ps-topbar__of {
+  font-weight: 400;
+  color: var(--ps-muted);
+}
+
+.ps-progress__bar {
+  flex: 1;
+  height: 6px;
+  background: var(--ps-border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.ps-progress__fill {
+  height: 100%;
+  background: hsl(var(--primary, 221 83% 53%));
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.ps-topbar__answered {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ps-muted);
+  white-space: nowrap;
+}
+
+/* ─ Score banner ─ */
+.ps-score {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  border-radius: var(--ps-radius);
+  border: 1.5px solid transparent;
+  animation: ps-fadein 0.4s ease;
+}
+
+.ps-score--pass {
+  background: var(--ps-correct-bg);
+  border-color: var(--ps-correct);
+  color: var(--ps-correct);
+}
+
+.ps-score--fail {
+  background: var(--ps-wrong-bg);
+  border-color: var(--ps-wrong);
+  color: var(--ps-wrong);
+}
+
+.ps-score__headline {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.ps-score__sub {
+  font-size: 0.85rem;
+  margin: 0.15rem 0 0;
+}
+
+/* ─ Prev / Next navigation ─ */
+.ps-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.ps-nav__btn {
+  min-width: 7.5rem;
+  justify-content: center;
+}
+
+/* Dot trail */
+.ps-nav__dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  flex: 1;
+}
+
+.ps-nav__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: var(--ps-border);
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.ps-nav__dot--active {
+  background: hsl(var(--primary, 221 83% 53%));
+  transform: scale(1.4);
+}
+
+/* Correct answer — green dot */
+.ps-nav__dot--correct {
+  background: var(--ps-correct);
+}
+
+.ps-nav__dot--active.ps-nav__dot--correct {
+  background: var(--ps-correct);
+  transform: scale(1.4);
+}
+
+/* Wrong answer — red dot */
+.ps-nav__dot--wrong {
+  background: var(--ps-wrong);
+}
+
+.ps-nav__dot--active.ps-nav__dot--wrong {
+  background: var(--ps-wrong);
+  transform: scale(1.4);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Question Card — .pq-*
+   ═══════════════════════════════════════════════════════════ */
+
+.pq-card {
+  background: var(--ps-surface);
+  border: 1.5px solid var(--ps-border);
+  border-radius: var(--ps-radius);
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.pq-card:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+}
+
+/* Header */
+.pq-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.pq-card__number {
+  font-weight: 800;
+  font-size: 1rem;
+  color: hsl(var(--primary, 221 83% 53%));
+}
+
+/* Fullscreen button */
+.pq-card__fullscreen-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--ps-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.pq-card__fullscreen-btn:hover {
+  background: var(--ps-border);
+  color: hsl(var(--foreground));
+}
+
+/* Fullscreen card state */
+.pq-card--fullscreen {
+  width: 100%;
+  height: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  overflow-y: auto;
+  padding: 2rem;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* Dark bg behind fullscreen card (applied by browser on the element) */
+:fullscreen .pq-card--fullscreen,
+:-webkit-full-screen .pq-card--fullscreen {
+  background: hsl(var(--card, 0 0% 100%));
+}
+
+.dark :fullscreen .pq-card--fullscreen,
+.dark :-webkit-full-screen .pq-card--fullscreen {
+  background: hsl(217 33% 10%);
+}
+
+
+/* Badges */
+.pq-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pq-badge--easy {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.pq-badge--medium {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.pq-badge--hard {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.dark .pq-badge--easy {
+  background: #14532d;
+  color: #86efac;
+}
+
+.dark .pq-badge--medium {
+  background: #451a03;
+  color: #fde68a;
+}
+
+.dark .pq-badge--hard {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+/* Question text */
+.pq-card__text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: hsl(var(--foreground));
+}
+
+/* Options */
+.pq-card__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.pq-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.6rem;
+  border: 1.5px solid var(--ps-border);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  position: relative;
+}
+
+.pq-option:hover:not(:disabled) {
+  background: hsl(var(--accent, 210 40% 96%));
+  border-color: hsl(var(--primary, 221 83% 53%));
+  transform: translateX(2px);
+}
+
+.pq-option:disabled {
+  cursor: default;
+}
+
+.pq-option--selected {
+  background: hsl(var(--primary, 221 83% 53%) / 0.1);
+  border-color: hsl(var(--primary, 221 83% 53%));
+}
+
+.pq-option--correct {
+  background: var(--ps-correct-bg);
+  border-color: var(--ps-correct);
+}
+
+.pq-option--wrong {
+  background: var(--ps-wrong-bg);
+  border-color: var(--ps-wrong);
+}
+
+.pq-option--faded {
+  opacity: 0.5;
+}
+
+.pq-option__label {
+  font-weight: 700;
+  min-width: 1.4rem;
+  color: hsl(var(--muted-foreground, 215 16% 47%));
+}
+
+.pq-option__text {
+  flex: 1;
+}
+
+.pq-option__icon {
+  margin-left: auto;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pq-option__icon--correct {
+  color: var(--ps-correct);
+}
+
+.pq-option__icon--wrong {
+  color: var(--ps-wrong);
+}
+
+/* Error */
+.pq-card__error {
+  font-size: 0.85rem;
+  color: var(--ps-wrong);
+  margin: 0;
+}
+
+/* Feedback */
+.pq-card__feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.65rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  animation: ps-fadein 0.3s ease;
+}
+
+.pq-card__feedback--correct {
+  background: var(--ps-correct-bg);
+  color: var(--ps-correct);
+}
+
+.pq-card__feedback--wrong {
+  background: var(--ps-wrong-bg);
+  color: var(--ps-wrong);
+}
+
+.pq-card__feedback-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pq-card__hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.pq-card__hint-btn:hover {
+  opacity: 1;
+}
+
+/* Hint section wrapper */
+.pq-card__hint-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Shared hint block */
+.pq-card__hint {
+  padding: 0.85rem 1rem;
+  border-radius: 0.5rem;
+  border-left: 3px solid transparent;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  animation: ps-fadein 0.3s ease;
+}
+
+/* Correct hint — green */
+.pq-card__hint--correct {
+  background: var(--ps-correct-bg);
+  border-left-color: var(--ps-correct);
+}
+
+/* Wrong hint — red */
+.pq-card__hint--wrong {
+  background: var(--ps-wrong-bg);
+  border-left-color: var(--ps-wrong);
+}
+
+.dark .pq-card__hint--correct {
+  background: #14532d;
+}
+
+.dark .pq-card__hint--wrong {
+  background: #450a0a;
+}
+
+/* Hint label header */
+.pq-card__hint-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.pq-card__hint-label--correct {
+  color: var(--ps-correct);
+}
+
+.pq-card__hint-label--wrong {
+  color: var(--ps-wrong);
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   Image Carousel — .practice-carousel
+   ═══════════════════════════════════════════════════════════ */
+
+.practice-carousel {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: hsl(var(--muted, 210 40% 96%));
+  user-select: none;
+}
+
+.dark .practice-carousel {
+  background: hsl(217 33% 14%);
+}
+
+.practice-carousel__track {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .practice-carousel {
+    width: fit-content;
+  }
+
+  .practice-carousel__track {
+    aspect-ratio: unset;
+    width: 400px;
+    height: 250px;
+  }
+}
+
+.practice-carousel__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  /* Keeps image correctly scaled inside the 400x250 container */
+  width: 100%;
+  height: 100%;
+  cursor: zoom-in;
+  transition: transform 0.2s;
+}
+
+.practice-carousel__img:hover {
+  transform: scale(1.01);
+}
+
+.practice-carousel__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ps-muted);
+  font-size: 0.85rem;
+}
+
+.practice-carousel__zoom-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  border-radius: 0.35rem;
+  padding: 0.35rem;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.practice-carousel__zoom-btn:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* Arrows */
+.practice-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.15s;
+}
+
+.practice-carousel__arrow:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.practice-carousel__arrow--prev {
+  left: 0.5rem;
+}
+
+.practice-carousel__arrow--next {
+  right: 0.5rem;
+}
+
+/* Dots */
+.practice-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.5rem;
+}
+
+.practice-carousel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.dark .practice-carousel__dot {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.practice-carousel__dot--active {
+  background: hsl(var(--primary, 221 83% 53%));
+  transform: scale(1.3);
+}
+
+/* Lightbox */
+.practice-carousel__lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ps-fadein 0.2s ease;
+}
+
+.practice-carousel__lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.practice-carousel__lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.practice-carousel__lightbox-img {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ─ KaTeX global adjustments ─ */
+.katex-rendered .katex-display {
+  margin: 0.5rem 0;
+}
+
+.katex-rendered p {
+  margin: 0 0 0.4rem;
+}
+
+/* ─ Animations ─ */
+@keyframes ps-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

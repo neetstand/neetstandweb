@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
+import { Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getSettings } from "@/lib/getSettings";
+import { GoogleTagManager } from '@next/third-parties/google';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,16 +32,25 @@ export default async function RootLayout({
 }>) {
   const { maintenance_mode }: Record<string, string> = await getSettings()
 
-  console.log(maintenance_mode, "maintenance_mode")
+
 
   const isMaintenance = maintenance_mode === "true";
 
-  console.log(isMaintenance, "isMaintenance")
+
 
   if (isMaintenance) {
     return (
       <html lang="en" suppressHydrationWarning>
+        <GoogleTagManager gtmId="GTM-5DL8T773" />
         <body className={inter.className}>
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-5DL8T773"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
           <Maintenance />
         </body>
       </html>
@@ -47,19 +59,32 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <GoogleTagManager gtmId="GTM-5DL8T773" />
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          {children}
-          {modal}
-          <Toaster position="bottom-right" />
-          <Footer />
-        </ThemeProvider>
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-5DL8T773"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        <Suspense fallback={null}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Suspense fallback={null}>
+              <Navbar />
+            </Suspense>
+            {children}
+            {modal}
+            <Toaster position="bottom-right" />
+            <Footer />
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   );

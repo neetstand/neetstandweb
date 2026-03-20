@@ -38,7 +38,7 @@ export const Footer = () => {
 
     return (
         <motion.footer
-            className="relative z-50 py-12 px-6 bg-sky-200/80 dark:bg-slate-800/80 backdrop-blur-md text-sky-950 dark:text-slate-100 border-t border-sky-300 dark:border-slate-600 text-base"
+            className="relative z-10 py-12 px-6 bg-sky-200/80 dark:bg-slate-800/80 backdrop-blur-md text-sky-950 dark:text-slate-100 border-t border-sky-300 dark:border-slate-600 text-base"
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
@@ -77,8 +77,8 @@ export const Footer = () => {
                     {
                         title: "Legal",
                         links: [
-                            { label: "Privacy Policy", href: "/privacy" },
-                            { label: "Terms of Service", href: "/terms" },
+                            { label: "Privacy Policy", href: "/privacy-policy" },
+                            { label: "Terms of Service", href: "/terms-of-service" },
                         ],
                     },
                 ].map((col, i) => (
@@ -87,12 +87,12 @@ export const Footer = () => {
                         <ul className="text-sky-800 dark:text-slate-400 space-y-2">
                             {col.links.map((link, j) => (
                                 <li key={j}>
-                                    <Link
+                                    <a
                                         href={link.href}
                                         className="cursor-pointer hover:text-sky-600 dark:hover:text-slate-200 transition-colors"
                                     >
                                         {link.label}
-                                    </Link>
+                                    </a>
                                 </li>
                             ))}
                         </ul>
@@ -103,7 +103,7 @@ export const Footer = () => {
                 className="border-t border-sky-300 dark:border-slate-600 pt-8 text-center text-sky-800 dark:text-slate-400"
                 variants={item}
             >
-                <p>© 2026 NEETStand. All rights reserved.</p>
+                <p>© 2026 Dhanvid Edutech Pvt. Ltd. All rights reserved.</p>
             </motion.div>
         </motion.footer>
     );

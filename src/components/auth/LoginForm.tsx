@@ -43,7 +43,7 @@ export function LoginForm() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+
         // TODO: Integrate with backend login
         // For now, native login logic (Supabase doesn't support generic 'identifier' easily without custom logic)
         // We'll leave the submission log as placeholder until Phone/Email split logic is decided.

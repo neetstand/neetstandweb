@@ -17,7 +17,7 @@ export async function getSettings(): Promise<Settings> {
 
         if (error) {
             console.error("Error fetching settings:", JSON.stringify(error, null, 2));
-            return {};
+            return { ...AppConfig, maintenance_mode: "true" };
         }
 
         const dbSettings: Record<string, string> = {};
@@ -26,17 +26,18 @@ export async function getSettings(): Promise<Settings> {
         }
 
         const settings: AppConfigType & Record<string, string> = {
+            maintenance_mode: "true", // Default to true for safety
             ...AppConfig,
             ...dbSettings
         }
 
-        console.log("getSettings loaded. Maintenance Mode:", settings["maintenance_mode"]);
+
 
         return settings;
 
     } catch (err) {
         console.error("Exception fetching settings:", err);
-        return AppConfig;
+        return { ...AppConfig, maintenance_mode: "true" };
     }
 }
 

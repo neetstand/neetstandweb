@@ -55,7 +55,7 @@ export function PhoneAuthForm({ onSuccess }: { onSuccess: () => void }) {
         } else {
             toast.success("Logged in successfully!");
             onSuccess();
-            router.push("/dashboard");
+            window.location.href = "/dashboard";
         }
         setLoading(false);
     };

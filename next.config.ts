@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'killerplayer.com' },
+      { protocol: 'https', hostname: 'youtu.be' },
+      { protocol: 'https', hostname: 'youtube.com' },
+      { protocol: 'https', hostname: 'www.youtube.com' }
+    ]
+  },
   cacheComponents: true,
   cacheLife: {
     adminControlledYear: {
@@ -10,7 +18,6 @@ const nextConfig: NextConfig = {
       expire: 34020000,
     }
   }
-  /* config options here */
 };
 
 export default nextConfig;

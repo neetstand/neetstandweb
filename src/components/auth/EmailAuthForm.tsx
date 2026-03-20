@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { splitEmail } from "@/utils";
 
 export function EmailAuthForm({ onSuccess, onBack, onGoogleLogin }: { onSuccess: () => void, onBack: () => void, onGoogleLogin: () => Promise<void> }) {
     const [loading, setLoading] = useState(false);
@@ -32,8 +33,11 @@ export function EmailAuthForm({ onSuccess, onBack, onGoogleLogin }: { onSuccess:
         e.preventDefault();
         setLoading(true);
 
+        const { beforePlus, domain } = splitEmail(email);
+        const sanitizedEmail = `${beforePlus}@${domain}`;
+
         const { error } = await supabase.auth.signInWithPassword({
-            email,
+            email: sanitizedEmail,
             password,
         });
 
@@ -43,7 +47,7 @@ export function EmailAuthForm({ onSuccess, onBack, onGoogleLogin }: { onSuccess:
         } else {
             toast.success("Logged in successfully!");
             onSuccess();
-            router.push("/dashboard");
+            window.location.href = "/dashboard";
         }
     };
 

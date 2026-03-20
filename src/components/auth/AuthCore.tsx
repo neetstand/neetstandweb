@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { CountrySelect } from "./CountrySelect";
-import { checkUserStatus, sendCustomOtp, verifyCustomOtp, registerUser } from "@/app/auth/actions";
+import { checkUserStatus, registerUser } from "@/app/auth/actions";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
+import { splitEmail } from "@/utils";
 
 interface AuthCoreProps {
     onSuccess?: () => void;
@@ -87,9 +88,14 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                 if (res.error) throw new Error(res.error);
                 toast.success("Code resent successfully");
             } else {
-                const isPhoneType = verificationInfo.type !== "email";
-                const res = await sendCustomOtp(verificationInfo.identifier, isPhoneType);
-                if (res.error) throw new Error(res.error);
+                // Standard Resend (Email)
+                // verificationInfo.identifier is the email (resolved during checkUserStatus)
+                const { error } = await supabase.auth.signInWithOtp({
+                    email: verificationInfo.identifier,
+                    options: { shouldCreateUser: false }
+                });
+
+                if (error) throw error;
                 toast.success("Code resent successfully");
             }
             setTimeLeft(60);
@@ -123,6 +129,9 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                     setIsLoading(false);
                     return;
                 }
+                // Sanitize email
+                const { beforePlus, domain } = splitEmail(identifier);
+                checkVal = `${beforePlus}@${domain}`;
             }
 
             // Check Status (This also sends OTP if user exists via signInWithOtp)
@@ -151,7 +160,7 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                     setPhoneInput(identifier); // Save what they typed
                     setEmailInput(""); // Clear email
                 } else {
-                    setEmailInput(identifier);
+                    setEmailInput(checkVal); // Use sanitized email
                     setPhoneInput("");
                 }
                 setStep("COLLECT_INFO");
@@ -172,7 +181,10 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
 
         try {
             const finalPhone = `${country}${phoneInput}`;
-            const finalEmail = emailInput;
+
+            // Sanitize email input
+            const { beforePlus, domain } = splitEmail(emailInput);
+            const finalEmail = `${beforePlus}@${domain}`;
 
             // Register and Send OTP
             // Custom registration logic: Create User -> Send OTP

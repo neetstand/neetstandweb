@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@admin/*": [
+        "../admin/*"
       ]
     }
   },
@@ -37,8 +40,9 @@
     "**/*.mts",
     "src/**/*",
     ".next-admin/types/**/*.ts",
-    ".next-admin/dev/types/**/*.ts"
-, "../admin/src/utils/supabase/admin.ts"  ],
+    ".next-admin/dev/types/**/*.ts",
+    "../admin/src/utils/supabase/admin.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

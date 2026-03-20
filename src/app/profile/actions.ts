@@ -23,17 +23,11 @@ export async function updatePersonalInfo(prevState: ProfileState, formData: Form
         const { error } = await supabase
             .from("profiles")
             .update({
-                full_name: fullName,
-                updated_at: new Date().toISOString(),
+                full_name: fullName
             })
             .eq("id", user.id);
 
         if (error) throw error;
-
-        // Also update auth.users metadata for consistency
-        await supabase.auth.updateUser({
-            data: { full_name: fullName }
-        });
 
         revalidatePath("/profile");
         return { success: true, message: "Personal info updated successfully" };
@@ -67,8 +61,7 @@ export async function updatePreferences(prevState: ProfileState, formData: FormD
             city_events: cityEvents,
             email,
             sms,
-            phone,
-            updated_at: new Date().toISOString(),
+            phone
         };
 
         const { error } = await supabase

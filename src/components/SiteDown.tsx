@@ -1,14 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 export default function SiteDown() {
-    const [year, setYear] = useState<number | null>(null);
-
-    useEffect(() => {
-        setYear(new Date().getFullYear());
-    }, []);
+    const year = new Date().getFullYear();
 
     return (
         <div className="relative min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white overflow-hidden selection:bg-rose-500/30">
@@ -46,7 +39,7 @@ export default function SiteDown() {
             {/* Footer */}
             <div className="absolute bottom-8 left-0 w-full text-center z-10">
                 <p className="text-xs text-slate-600">
-                    &copy; {year || 2026} NEET Stand. All rights reserved.
+                    &copy; 2026 Dhanvid Edutech Pvt. Ltd. All rights reserved.
                 </p>
             </div>
         </div>
