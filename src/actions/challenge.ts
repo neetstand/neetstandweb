@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { CHALLENGE_ISSUE_TYPES } from "@/lib/constants/challenge-issue-types";
 
 export async function submitQuestionChallenge(question_id: string, issue_type: string, user_comment: string) {
     const supabase = await createClient();
@@ -75,16 +76,5 @@ export async function getUserChallenges() {
 }
 
 export async function getChallengeIssueTypes() {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-        .from("challenge_issue_types")
-        .select("label")
-        .order("id", { ascending: true });
-
-    if (error) {
-        console.error("Error fetching issue types:", error);
-        return { status: "error", message: error.message, data: [] };
-    }
-
-    return { status: "success", data: data.map(d => d.label) };
+    return { status: "success", data: [...CHALLENGE_ISSUE_TYPES] };
 }
