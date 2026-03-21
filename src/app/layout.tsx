@@ -32,11 +32,9 @@ export default async function RootLayout({
 }>) {
   const { maintenance_mode }: Record<string, string> = await getSettings()
 
-
+  console.log(maintenance_mode, "maintenance_mode")
 
   const isMaintenance = maintenance_mode === "true";
-
-
 
   if (isMaintenance) {
     return (
