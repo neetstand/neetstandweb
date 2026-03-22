@@ -7,6 +7,9 @@ export async function POST(req: Request) {
     const authHeader = req.headers.get("authorization");
     const origin = req.headers.get("origin") || ""
 
+    console.log("[DEBUG] Web App sees ADMIN_API_KEY as:", process.env.ADMIN_API_KEY);
+    console.log("[DEBUG] Web App received Authorization header as:", authHeader);
+
     if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}`) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
