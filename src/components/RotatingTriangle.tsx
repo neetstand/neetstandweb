@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { heroStandBase64, heroBrandBase64, heroHelpBase64 } from './hero-images';
 
 // Typewriter Effect Component
 const TypewriterText = ({ text, isDark }: { text: string; isDark: boolean }) => {
@@ -39,15 +40,15 @@ export const RotatingTriangle = ({ isDark, scale = 1 }: { isDark: boolean; scale
     const faces = [
         {
             text: "I dreamed",
-            image: "/hero-stand.png"
+            image: heroStandBase64
         },
         {
             text: "I became a Doctor",
-            image: "/hero-brand.png"
+            image: heroBrandBase64
         },
         {
             text: "I studied smartly",
-            image: "/hero-help.png"
+            image: heroHelpBase64
         }
     ];
 
