@@ -2,16 +2,13 @@
 
 import { Modal } from "@/components/modal";
 import { AuthCore } from "@/components/auth/AuthCore";
-import { useRouter } from "next/navigation";
 
 export default function RegisterModal() {
-    const router = useRouter();
-
     return (
         <Modal>
             <AuthCore
                 isModal={true}
-                onSuccess={() => router.back()}
+                onSuccess={() => { window.location.href = "/onboarding"; }}
                 initialView="register"
             />
         </Modal>

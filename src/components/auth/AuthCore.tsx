@@ -251,7 +251,8 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
             toast.success("Login Successful");
 
             // Force hard navigation to ensure fresh session state
-            window.location.href = "/dashboard";
+            // Middleware will redirect completed users to /dashboard
+            window.location.href = "/onboarding";
 
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : "Invalid Code";

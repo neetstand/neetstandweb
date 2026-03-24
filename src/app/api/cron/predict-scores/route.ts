@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { calculatePredictionForUser, PredictionStage } from "@/lib/prediction-engine";
 
@@ -6,7 +7,8 @@ export const maxDuration = 300; // Allow max duration for cron tasks if on Verce
 
 export async function GET(req: Request) {
     try {
-        const authHeader = req.headers.get('authorization');
+        const headersList = await headers();
+        const authHeader = headersList.get('authorization');
         // Basic authorization check (Optional depending on cron setup)
         if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
             return new Response('Unauthorized', { status: 401 });
