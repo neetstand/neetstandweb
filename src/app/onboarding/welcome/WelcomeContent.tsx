@@ -14,8 +14,8 @@ export default function WelcomeContent() {
             >
                 <div className="flex flex-col items-center space-y-4">
                     <div className="flex items-center justify-center mb-2">
-                        <Image src="/neetstand-light.png" alt="NEETStand Logo" width={200} height={50} className="dark:hidden h-auto w-auto max-h-12" />
-                        <Image src="/neetstand-dark.png" alt="NEETStand Logo" width={200} height={50} className="hidden dark:block h-auto w-auto max-h-12" />
+                        <Image src="/neetstand-light.png" alt="NEETStand Logo" width={200} height={50} style={{ width: 'auto', height: 'auto' }} className="dark:hidden max-h-12" />
+                        <Image src="/neetstand-dark.png" alt="NEETStand Logo" width={200} height={50} style={{ width: 'auto', height: 'auto' }} className="hidden dark:block max-h-12" />
                     </div>
                     <div
                         className="inline-block px-4 py-1.5 rounded-full bg-green-50 dark:bg-emerald-900/30 border border-green-100 dark:border-emerald-800 text-sm font-medium text-green-700 dark:text-emerald-400 tracking-wider uppercase animate-in fade-in zoom-in-95 duration-700 delay-200 fill-mode-both"

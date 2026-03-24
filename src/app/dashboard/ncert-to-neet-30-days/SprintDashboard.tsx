@@ -285,6 +285,26 @@ export default function SprintDashboard({
             };
         });
 
+    // Extract chapters for the Analytics Drill-Down by subject
+    const chaptersBySubject: Record<string, { code: string; name: string }[]> = {
+        physics: [],
+        chemistry: [],
+        biology: []
+    };
+
+    activePlan?.days?.forEach((d: any) => {
+        if (d.physicsChapter) chaptersBySubject.physics.push({ code: d.physics_chapter_code, name: d.physicsChapter.chapter_name });
+        if (d.chemistryChapter) chaptersBySubject.chemistry.push({ code: d.chemistry_chapter_code, name: d.chemistryChapter.chapter_name });
+        if (d.biologyChapter) chaptersBySubject.biology.push({ code: d.biology_chapter_code, name: d.biologyChapter.chapter_name });
+    });
+
+    // Remove duplicates
+    const uniqueChaptersBySubject = {
+        physics: Array.from(new Map(chaptersBySubject.physics.filter(c => c.code).map(item => [item.code, item])).values()),
+        chemistry: Array.from(new Map(chaptersBySubject.chemistry.filter(c => c.code).map(item => [item.code, item])).values()),
+        biology: Array.from(new Map(chaptersBySubject.biology.filter(c => c.code).map(item => [item.code, item])).values()),
+    };
+
     return (
         <div className="relative min-h-[calc(100vh-64px)] bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
             {/* Only render internal modal if no parent is controlling it */}
@@ -477,6 +497,7 @@ export default function SprintDashboard({
                 isOpen={showAnalytics}
                 onClose={() => setShowAnalytics(false)}
                 completedDays={completedDays}
+                chaptersBySubject={uniqueChaptersBySubject}
             />
 
             <ProgressModal
