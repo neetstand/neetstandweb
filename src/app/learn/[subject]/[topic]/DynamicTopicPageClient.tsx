@@ -798,7 +798,7 @@ export default function DynamicTopicPageClient({
                     {/* ─── Active Content ──────────────────────────────── */}
                     <div className="order-1 lg:order-2 flex-1 min-w-0 w-full relative">
                         {/* Desktop Toggle Button at Juncture */}
-                        <div className="absolute top-1 -left-4 z-20 hidden lg:flex">
+                        <div className="absolute top-1 -left-9 z-20 hidden lg:flex">
                             <button
                                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                                 className={cn(
