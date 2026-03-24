@@ -72,6 +72,11 @@ export async function updateSession(request: NextRequest) {
                 .eq("id", user.id)
                 .single();
 
+            // Diagnostic Logging for Production Performance/Auth issues
+            if (!profile && !path.startsWith("/_next")) {
+                console.log(`[Middleware] No profile found for user ${user.id} at ${path}`);
+            }
+
             const isCompleted = profile?.onboarding_status === "COMPLETED" || profile?.onboarding_status === "PLAN_GENERATED";
 
             // Check for active plan instead of stale has_paid
