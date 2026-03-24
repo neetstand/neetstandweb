@@ -23,7 +23,7 @@ export default function PrivacyPolicyClient() {
                     <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">Privacy Policy</h1>
                     <p className="text-slate-500 dark:text-slate-400 font-medium pb-8 border-b border-slate-200 dark:border-slate-800">Last Updated: 26th Feb 2026</p>
 
-                    <p>Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our learning platform <strong>www.neetstand.com - a product of Dhanvid Edutech Private Limited hereinafter referred to as "NEETStand / Platform"</strong></p>
+                    <p>Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our learning platform <strong>neetstand.com - a product of Dhanvid Edutech Private Limited hereinafter referred to as "NEETStand / Platform"</strong></p>
 
                     <p>By accessing or registering on Platform, you agree to the practices described in this Privacy Policy, as well as our <Link href="/terms-of-service" className="text-indigo-600 dark:text-indigo-400 hover:underline">Terms & Conditions</Link> and <Link href="/refund-policy" className="text-indigo-600 dark:text-indigo-400 hover:underline">Refund & Cancellation Policy</Link>.</p>
 
@@ -129,7 +129,7 @@ export default function PrivacyPolicyClient() {
                     <p>If you have any questions about this Privacy Policy or how your data is handled, please contact us:</p>
                     <ul className="space-y-3 mt-4 list-none pl-0">
                         <li className="flex items-center gap-2"><strong>Email:</strong> <a href="mailto:support@neetstand.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support@neetstand.com</a></li>
-                        <li className="flex items-center gap-2"><strong>Website:</strong> <a href="https://www.neetstand.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">https://www.neetstand.com</a></li>
+                        <li className="flex items-center gap-2"><strong>Website:</strong> <a href="https://neetstand.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">https://neetstand.com</a></li>
                     </ul>
 
                 </article>

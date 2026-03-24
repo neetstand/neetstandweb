@@ -115,8 +115,8 @@ export async function updateSession(request: NextRequest) {
         }
     }
 
-    if (path.startsWith("/dashboard") && !user) {
-        return copyCookies(supabaseResponse, NextResponse.redirect(new URL("/", request.url)));
+    if ((path.startsWith("/dashboard") || path.startsWith("/onboarding")) && !user) {
+        return copyCookies(supabaseResponse, NextResponse.redirect(new URL("/login", request.url)));
     }
 
     if (path === "/" && user) {
