@@ -92,8 +92,8 @@ export function NavbarClient({ initialUser }: { initialUser: SupabaseUser | null
                             alt="NeetStand Logo"
                             width={210}
                             height={56}
-                            style={{ width: 'auto', height: 'auto' }}
-                            className="h-full object-contain block dark:hidden"
+                            style={{ width: 'auto', height: '56px' }}
+                            className="object-contain block dark:hidden"
                             priority
                         />
                         <Image
@@ -101,8 +101,8 @@ export function NavbarClient({ initialUser }: { initialUser: SupabaseUser | null
                             alt="NeetStand Logo"
                             width={210}
                             height={56}
-                            style={{ width: 'auto', height: 'auto' }}
-                            className="h-full object-contain hidden dark:block"
+                            style={{ width: 'auto', height: '56px' }}
+                            className="object-contain hidden dark:block"
                             priority
                         />
                     </div>
