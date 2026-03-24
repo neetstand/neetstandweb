@@ -101,7 +101,7 @@ export async function updateSession(request: NextRequest) {
                 if (isCompleted && !hasPaid && path !== "/onboarding/plan") {
                     return copyCookies(supabaseResponse, NextResponse.redirect(new URL(`/onboarding/plan?debug_reason=onboarding_redirect_no_paid&profileHasPaid=${profile?.has_paid}&purchases=${purchases?.length}`, request.url)));
                 }
-            } else if (!path.startsWith("/profile") && !path.startsWith("/learn") && !path.startsWith("/about") && !path.startsWith("/contact") && !path.startsWith("/privacy") && !path.startsWith("/terms") && !path.startsWith("/login") && !path.startsWith("/register") && !path.startsWith("/auth")) {
+            } else if ((!path.startsWith("/profile") || path.startsWith("/profile/challenges")) && !path.startsWith("/learn") && !path.startsWith("/about") && !path.startsWith("/contact") && !path.startsWith("/privacy") && !path.startsWith("/terms") && !path.startsWith("/login") && !path.startsWith("/register") && !path.startsWith("/auth")) {
                 // ── User is on a protected route (not onboarding, not profile) ──
                 if (!profile || !isCompleted) {
                     // Not completed onboarding — force into onboarding flow

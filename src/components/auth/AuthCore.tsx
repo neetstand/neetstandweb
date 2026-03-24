@@ -279,8 +279,8 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
                     <div className="w-[120%] h-[60%] bg-gradient-to-tr from-sky-200/40 via-blue-100/20 to-orange-100/30 blur-3xl rounded-full" />
                 </div>
                 <div className="relative w-72 h-24 mb-6 z-10 transition-transform hover:scale-105 duration-300">
-                    <Image src="/neetstand-light.png" alt="NeetStand Logo" fill className="object-contain dark:hidden" />
-                    <Image src="/neetstand-dark.png" alt="NeetStand Logo" fill className="object-contain hidden dark:block" />
+                    <Image src="/neetstand-light.png" alt="NeetStand Logo" fill sizes="288px" className="object-contain dark:hidden" />
+                    <Image src="/neetstand-dark.png" alt="NeetStand Logo" fill sizes="288px" className="object-contain hidden dark:block" />
                 </div>
                 <div className="z-10 font-bold text-xl mb-8 flex flex-row items-center gap-1 whitespace-nowrap">
                     <span className="text-sky-950 dark:text-blue-200">Pause .</span>
