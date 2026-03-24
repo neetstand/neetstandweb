@@ -1,21 +1,20 @@
 "use client";
 
 import { AuthCore } from "@/components/auth/AuthCore";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { WavyBackground } from "@/components/WavyBackground";
 import { useTheme } from "next-themes";
 import { useEffect, useState, Suspense } from "react";
 
 function LoginContent() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const stepParam = searchParams.get("step");
     const emailParam = searchParams.get("email");
 
     return (
         <AuthCore
-            onSuccess={() => router.push("/dashboard")}
+            onSuccess={() => { window.location.href = "/onboarding"; }}
             isModal={false}
             initialStep={stepParam === "COLLECT_PHONE" ? "COLLECT_INFO" : undefined}
             prefilledEmail={emailParam || undefined}

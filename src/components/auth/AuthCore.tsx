@@ -208,8 +208,9 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
 
             if (res.redirect || res.success) {
                 toast.success("Profile updated!");
-                router.refresh();
-                router.push("/dashboard");
+                // Use full page navigation to trigger middleware,
+                // which redirects incomplete users to /onboarding
+                window.location.href = "/onboarding";
                 return;
             }
 
@@ -263,7 +264,7 @@ function AuthCoreContent({ onSuccess, isModal = false, initialStep, prefilledEma
         await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+                redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
             },
         });
     };
