@@ -74,10 +74,10 @@ export async function saveOnboardingStep(data: {
 
     const { error } = await supabase
         .from("profiles")
-        .upsert({
-            id: user.id,
+        .update({
             ...updatePayload
-        });
+        })
+        .eq("id", user.id);
 
     if (error) {
         console.error("Error saving onboarding step:", error);
