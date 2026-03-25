@@ -4,56 +4,70 @@ import { BigButton } from "@/components/onboarding/BigButton";
 import { RadioCard } from "@/components/onboarding/RadioCard";
 import { StepLayout } from "@/components/onboarding/StepLayout";
 import { saveOnboardingStep } from "@/app/onboarding/actions";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export function IdentificationForm() {
     const router = useRouter();
-    const [step, setStep] = useState<"appeared" | "class">("appeared");
+    const searchParams = useSearchParams();
+    
+    // Use URL param for step to ensure it persists across revalidations/refreshes
+    const step = (searchParams.get("step") as "appeared" | "class") || "appeared";
+    
     const [loading, setLoading] = useState(false);
+    const [localSelection, setLocalSelection] = useState<string | null>(null);
 
-    // Answer to "Have you appeared before?"
+    // Sync local selection if state changes
+    useEffect(() => {
+        setLocalSelection(null);
+        setLoading(false);
+    }, [step]);
+
+    const setStepInUrl = (newStep: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("step", newStep);
+        router.push(`?${params.toString()}`);
+    };
+
     const handleAppearedSelection = async (hasAppeared: boolean) => {
+        setLocalSelection(hasAppeared ? "yes" : "no");
         if (hasAppeared) {
-            // Yes -> Repeater
             setLoading(true);
             try {
                 await saveOnboardingStep({
                     currentClass: "repeater",
-                    attemptCount: 1 // Assumed > 0
+                    attemptCount: 1
                 });
-                // Next.js retains component state on router.push; explicitly clear loading
-                // before transition to prevent infinite spinners on "Back" or "Restart"
-                setLoading(false);
+                // Note: revalidatePath in the action might trigger a page refresh.
+                // By using URL params for step, we stay on 'appeared' if it refreshes,
+                // but the following push should move us forward.
                 router.push("/onboarding/analysis/score");
             } catch (error) {
                 toast.error("Failed to save progress");
                 setLoading(false);
+                setLocalSelection(null);
             }
         } else {
-            // No -> Ask Class
-            setStep("class");
+            setStepInUrl("class");
         }
     };
 
     const handleClassSelection = async (className: "11" | "12") => {
+        setLocalSelection(className);
         setLoading(true);
         try {
             if (className === "11") {
-                // Class 11 -> Early Exit
                 await saveOnboardingStep({ currentClass: "11", attemptCount: 0 });
-                setLoading(false);
                 router.push("/onboarding/class-11");
             } else {
-                // Class 12 -> Diagnostic
                 await saveOnboardingStep({ currentClass: "12", attemptCount: 0 });
-                setLoading(false);
                 router.push("/onboarding/diagnostic/intro");
             }
         } catch (error) {
             toast.error("Failed to save progress");
             setLoading(false);
+            setLocalSelection(null);
         }
     };
 
@@ -72,14 +86,14 @@ export function IdentificationForm() {
                         <RadioCard
                             label="Yes"
                             subLabel="I have attempted NEET at least once."
-                            onClick={() => handleAppearedSelection(true)}
-                            selected={false}
+                            onClick={() => !loading && handleAppearedSelection(true)}
+                            selected={localSelection === "yes"}
                         />
                         <RadioCard
                             label="No"
                             subLabel="I am appearing for the first time."
-                            onClick={() => handleAppearedSelection(false)}
-                            selected={false}
+                            onClick={() => !loading && handleAppearedSelection(false)}
+                            selected={localSelection === "no"}
                         />
                     </div>
                     {loading && (
@@ -104,18 +118,19 @@ export function IdentificationForm() {
                     <div className="w-full space-y-4 flex flex-col items-center">
                         <RadioCard
                             label="Class 11"
-                            onClick={() => handleClassSelection("11")}
-                            selected={false}
+                            onClick={() => !loading && handleClassSelection("11")}
+                            selected={localSelection === "11"}
                         />
                         <RadioCard
                             label="Class 12"
-                            onClick={() => handleClassSelection("12")}
-                            selected={false}
+                            onClick={() => !loading && handleClassSelection("12")}
+                            selected={localSelection === "12"}
                         />
                     </div>
                     <button
-                        onClick={() => setStep("appeared")}
-                        className="mt-4 text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
+                        onClick={() => !loading && setStepInUrl("appeared")}
+                        className="mt-4 text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 disabled:opacity-50"
+                        disabled={loading}
                     >
                         Back
                     </button>
