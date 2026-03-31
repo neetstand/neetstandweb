@@ -22,11 +22,7 @@ export default async function OnboardingPage() {
     // 1. Completed Onboarding
     const isCompleted = ["COMPLETED", "PLAN_GENERATED"].includes(profile.onboarding_status);
     if (isCompleted) {
-        if (profile.has_paid) {
-            redirect("/dashboard");
-        } else {
-            redirect("/onboarding/plan");
-        }
+        redirect("/dashboard");
     }
 
     // 2. Class 11 Flow

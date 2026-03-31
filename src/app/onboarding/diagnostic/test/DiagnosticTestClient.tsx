@@ -265,7 +265,7 @@ export function DiagnosticTestClient({
                 {/* Question Scroll Area */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-10 hide-scrollbar">
                     <h2 className="text-xl md:text-2xl font-medium text-slate-900 dark:text-slate-50 leading-relaxed mb-8">
-                        Which of the following statements is true?
+                        Which of the following statement is true?
                     </h2>
 
                     <AnimatePresence mode="popLayout">

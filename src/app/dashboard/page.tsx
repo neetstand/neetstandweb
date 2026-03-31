@@ -13,17 +13,8 @@ export default async function DashboardGate() {
         return redirect("/");
     }
 
-    // Check for an active user plan purchase
-    const { data: userPlans } = await supabase
-        .from("user_plan_purchases")
-        .select("status, plans(plan_name)")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-    const hasActivated = Boolean(userPlans && userPlans.length > 0);
-    const planName = (userPlans?.[0]?.plans as any)?.plan_name ?? null;
+    const hasActivated = true;
+    const planName = "30 Day Sprint Plan";
 
     return <DashboardLandingClient hasActivated={hasActivated} planName={planName} />;
 }

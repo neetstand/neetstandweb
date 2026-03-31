@@ -1,23 +1,9 @@
-import { createClient } from "@/utils/supabase/server";
 import { HeroClient } from "./HeroClient";
 import Link from "next/link";
 import { CheckCircle, XCircle, ArrowRight, ArrowUp, Target, BookOpen, TrendingUp } from 'lucide-react';
 import { FadeIn } from "./FadeIn"; // Assuming FadeIn is in the same directory
 
 export const Hero = async () => {
-    const supabase = await createClient();
-    // Fetch pricing data dynamically
-    const { data: plansData, error: plansError } = await supabase.from('plans').select('*, plan_pricing(*)');
-
-    const plans = plansData || [];
-
-    const getPrice = (name: string, isMrp = false) => {
-        const p = plans.find((x: any) => x.plan_name === name);
-        if (!p || !p.plan_pricing || p.plan_pricing.length === 0) return 0;
-        const pricing = p.plan_pricing[0];
-        return isMrp ? pricing.mrp_price : pricing.offer_price;
-    };
-
     return (
         <HeroClient>
             {/* Problem */}
@@ -135,116 +121,64 @@ export const Hero = async () => {
                 </div>
             </FadeIn>
 
-            {/* Pricing */}
-            <FadeIn className="py-16 px-6 bg-transparent text-sky-950 dark:text-slate-100">
-                <div id="pricing" className="max-w-7xl mx-auto px-6"> {/* Moved id="pricing" to an inner block so link anchors properly work inside FadeIn's section. */}
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">Pricing</h2>
-                        <p className="text-xl">Choose the plan that fits your weak areas.</p>
-                    </div>
-                    <div className="flex flex-col gap-10 max-w-6xl mx-auto text-left">
-                        {/* 30 Day Sprint Plan (Bundle) - Highlighted at top */}
-                        <div className="w-full max-w-4xl mx-auto">
-                            <div className="bg-white dark:bg-slate-700 border-2 border-emerald-500 shadow-xl dark:shadow-emerald-900/20 rounded-2xl p-6 sm:p-8 flex flex-col relative transform hover:-translate-y-1 transition-transform duration-300">
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-5 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider whitespace-nowrap shadow-md">Best Value Bundle</div>
+            {/* Free Announcement */}
+            <FadeIn className="py-24 px-6 bg-transparent">
+                <div className="max-w-6xl mx-auto relative cursor-default">
+                    {/* Glowing background blob */}
+                    <div className="absolute inset-0 bg-emerald-400 blur-[120px] opacity-20 dark:opacity-30 rounded-full scale-110 animate-pulse pointer-events-none"></div>
 
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 mt-2">
-                                    <div className="max-w-md">
-                                        <h3 className="text-2xl md:text-3xl font-bold mb-3 text-emerald-600 dark:text-emerald-400">30 Day Sprint</h3>
-                                        <p className="text-sky-800 dark:text-slate-400 text-base leading-relaxed">The ultimate bundle. Master Physics, Chemistry, and Biology combined in a hyper-focused 30 day track.</p>
-                                    </div>
-                                    <div className="flex flex-col md:items-end">
-                                        <div className="flex items-baseline gap-2 md:gap-3">
-                                            <span className="text-4xl md:text-5xl font-extrabold text-emerald-600">₹{getPrice("30 Day Sprint Plan")}</span>
-                                            <span className="text-xl font-medium text-sky-800/60 dark:text-slate-400/60 line-through">₹{getPrice("30 Day Sprint Plan", true)}</span>
-                                        </div>
-                                        <span className="text-emerald-500 font-semibold text-sm mt-2 block uppercase tracking-wider">Valid for 45 Days • One time payment</span>
-                                    </div>
-                                </div>
+                    <div className="relative group overflow-hidden rounded-[2.5rem] bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-sky-200 dark:border-slate-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)]">
+                        
+                        {/* Premium Dotted Grid Background */}
+                        <div className="absolute inset-0 [background:radial-gradient(#10b981_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.15] dark:opacity-[0.1] pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/60 to-white dark:via-slate-900/60 dark:to-slate-900 pointer-events-none"></div>
 
-                                <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-xl p-5 mb-8">
-                                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm md:text-base">
-                                        {['All 3 Subjects Included', 'Daily Flash Tests', 'Weekly Full Mocks', 'Smart Revision Plan'].map((f, i) => (
-                                            <li key={i} className="flex items-center font-medium bg-transparent text-emerald-950 dark:text-emerald-100">
-                                                <CheckCircle className="text-emerald-500 mr-3 flex-shrink-0" size={20} />
-                                                <span>{f}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <Link href="/login" className="block text-center w-full py-4 rounded-xl font-bold text-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 mt-auto border border-emerald-500">Get Full Access</Link>
+                        {/* Corner decorative lights */}
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-emerald-400/30 dark:from-emerald-500/20 to-transparent blur-3xl rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-sky-400/20 dark:from-sky-500/20 to-transparent blur-3xl rounded-full translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
+                        
+                        <div className="relative p-10 md:p-20 flex flex-col items-center text-center">
+                            
+                            {/* Premium Badge */}
+                            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border mb-8 bg-white/50 dark:bg-black/40 border-emerald-200/80 dark:border-emerald-700/50 text-emerald-800 dark:text-emerald-300 backdrop-blur-md shadow-sm transition-transform hover:scale-105">
+                                <span className="relative flex h-2.5 w-2.5">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                </span>
+                                <span className="text-xs font-bold tracking-widest uppercase">Special Announcement</span>
                             </div>
-                        </div>
 
-                        {/* Separator / OR */}
-                        <div className="relative flex items-center justify-center mt-2 mb-8 opacity-60 flex-col">
-                            <div className="absolute inset-x-1/4 h-px bg-gradient-to-r from-transparent via-sky-300 dark:via-slate-600 to-transparent top-1/2"></div>
-                            <span className="relative bg-[#f0f9ff] dark:bg-[#0b1121] px-4 text-sm font-semibold text-sky-800 dark:text-slate-400 uppercase tracking-widest z-10">Or choose individual subjects</span>
-                            <p className="mt-4 text-[13px] text-sky-700 dark:text-slate-500 font-medium text-center px-4 max-w-2xl">
-                                <span className="text-emerald-500 px-1 font-bold">*</span> The Physics, Chemistry, and Biology plans are individual subject <br className="hidden sm:block" />breakdowns of the complete 30-Day Sprint Plan.
+                            {/* Headline */}
+                            <h2 className="text-5xl md:text-7xl font-black mb-6 text-sky-950 dark:text-white tracking-tight leading-[1.15]">
+                                We took a stand.<br />
+                                <span className="inline-block mt-4 text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-sky-500 dark:from-emerald-400 dark:via-teal-300 dark:to-sky-400 drop-shadow-sm pb-2">
+                                    NEETStand is 100% Free.
+                                </span>
+                            </h2>
+
+                            {/* Divider line */}
+                            <div className="w-24 h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-sky-400 mb-10"></div>
+
+                            {/* Descriptive Text */}
+                            <p className="text-xl md:text-2xl text-sky-800 dark:text-slate-300 mb-12 max-w-3xl font-medium leading-relaxed">
+                                No paywalls. No hidden fees. We believe every aspirant deserves access to the right tools for their final revision jump. Get complete access to <span className="font-bold text-sky-950 dark:text-white bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 rounded-lg">Physics, Chemistry, and Biology.</span>
                             </p>
-                        </div>
 
-                        {/* Individual Subjects - Bottom Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto">
-                            {/* Physics */}
-                            <div className="bg-white dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 rounded-xl p-6 flex flex-col hover:border-sky-300 dark:hover:border-slate-500 transition-colors">
-                                <h3 className="text-xl font-bold mb-2 text-sky-950 dark:text-white">30 Day Physics</h3>
-                                <p className="text-sky-800 dark:text-slate-400 mb-6 text-sm flex-grow">Master Mechanics, Electromagnetism & Modern Physics.</p>
-                                <div className="mb-4 flex items-baseline gap-2">
-                                    <span className="text-3xl font-bold text-sky-600 dark:text-sky-400">₹{getPrice("30 Day Physics")}</span>
-                                    <span className="text-sm font-medium text-sky-800/60 dark:text-slate-400/60 line-through">₹{getPrice("30 Day Physics", true)}</span>
-                                </div>
-                                <span className="block mb-4 text-xs font-semibold text-sky-600/80 dark:text-sky-400/80 uppercase tracking-wider">Valid for 45 Days</span>
-                                <ul className="space-y-3 mb-8 text-sm text-sky-900 dark:text-slate-300">
-                                    {['Physics concepts only', 'Chapter-wise tracking', 'Error log features'].map((f, i) => (
-                                        <li key={i} className="flex items-start">
-                                            <CheckCircle className="text-sky-500 mr-2 flex-shrink-0 mt-0.5" size={16} />
-                                            <span>{f}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <Link href="/login" className="block text-center w-full py-2.5 rounded-lg font-semibold bg-sky-50 dark:bg-slate-700/50 text-sky-900 dark:text-slate-200 hover:bg-sky-100 dark:hover:bg-slate-700 transition-colors mt-auto border border-sky-100 dark:border-slate-600">Select Physics</Link>
+                            {/* Quotes / Tagline */}
+                            <div className="mb-14 relative">
+                                <div className="absolute -inset-6 bg-emerald-100/50 dark:bg-emerald-900/20 blur-2xl rounded-full"></div>
+                                <p className="relative text-2xl md:text-3xl font-bold italic text-emerald-600 dark:text-emerald-400">
+                                    "Enjoy the Freedom."
+                                </p>
                             </div>
 
-                            {/* Chemistry */}
-                            <div className="bg-white dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 rounded-xl p-6 flex flex-col hover:border-sky-300 dark:hover:border-slate-500 transition-colors">
-                                <h3 className="text-xl font-bold mb-2 text-sky-950 dark:text-white">30 Day Chemistry</h3>
-                                <p className="text-sky-800 dark:text-slate-400 mb-6 text-sm flex-grow">Conquer Physical, Organic & Inorganic Chemistry.</p>
-                                <div className="mb-4 flex items-baseline gap-2">
-                                    <span className="text-3xl font-bold text-sky-600 dark:text-sky-400">₹{getPrice("30 Day Chemistry")}</span>
-                                    <span className="text-sm font-medium text-sky-800/60 dark:text-slate-400/60 line-through">₹{getPrice("30 Day Chemistry", true)}</span>
-                                </div>
-                                <span className="block mb-4 text-xs font-semibold text-purple-600/80 dark:text-purple-400/80 uppercase tracking-wider">Valid for 45 Days</span>
-                                <ul className="space-y-3 mb-8 text-sm text-sky-900 dark:text-slate-300">
-                                    {['Chemistry concepts only', 'NCERT-mapped questions', 'Reaction summaries'].map((f, i) => (
-                                        <li key={i} className="flex items-start">
-                                            <CheckCircle className="text-sky-500 mr-2 flex-shrink-0 mt-0.5" size={16} />
-                                            <span>{f}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <Link href="/login" className="block text-center w-full py-2.5 rounded-lg font-semibold bg-sky-50 dark:bg-slate-700/50 text-sky-900 dark:text-slate-200 hover:bg-sky-100 dark:hover:bg-slate-700 transition-colors mt-auto border border-sky-100 dark:border-slate-600">Select Chemistry</Link>
-                            </div>
-
-                            {/* Biology */}
-                            <div className="bg-white dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 rounded-xl p-6 flex flex-col hover:border-sky-300 dark:hover:border-slate-500 transition-colors">
-                                <h3 className="text-xl font-bold mb-2 text-sky-950 dark:text-white">30 Day Biology</h3>
-                                <p className="text-sky-800 dark:text-slate-400 mb-6 text-sm flex-grow">Dominate Botany & Zoology with pure NCERT focus.</p>
-                                <div className="mb-4 flex items-baseline gap-2">
-                                    <span className="text-3xl font-bold text-sky-600 dark:text-sky-400">₹{getPrice("30 Day Biology")}</span>
-                                    <span className="text-sm font-medium text-sky-800/60 dark:text-slate-400/60 line-through">₹{getPrice("30 Day Biology", true)}</span>
-                                </div>
-                                <span className="block mb-4 text-xs font-semibold text-rose-600/80 dark:text-rose-400/80 uppercase tracking-wider">Valid for 45 Days</span>
-                                <ul className="space-y-3 mb-8 text-sm text-sky-900 dark:text-slate-300">
-                                    {['Biology concepts only', 'High-weightage focus', 'Line-by-line NCERT'].map((f, i) => (
-                                        <li key={i} className="flex items-start">
-                                            <CheckCircle className="text-sky-500 mr-2 flex-shrink-0 mt-0.5" size={16} />
-                                            <span>{f}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <Link href="/login" className="block text-center w-full py-2.5 rounded-lg font-semibold bg-sky-50 dark:bg-slate-700/50 text-sky-900 dark:text-slate-200 hover:bg-sky-100 dark:hover:bg-slate-700 transition-colors mt-auto border border-sky-100 dark:border-slate-600">Select Biology</Link>
+                            {/* Call to action */}
+                            <div className="relative group/btn mt-4">
+                                <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-sky-500 rounded-2xl blur opacity-30 group-hover/btn:opacity-70 transition duration-500 animate-tilt"></div>
+                                <Link href="/login" className="relative flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold text-xl transition-all duration-300 shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] border border-emerald-400/20 hover:-translate-y-1">
+                                    Start Practicing Now
+                                    <ArrowRight size={24} className="group-hover/btn:translate-x-1.5 transition-transform" />
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -255,13 +189,13 @@ export const Hero = async () => {
             <FadeIn className="py-16 px-6 bg-transparent text-sky-950 dark:text-slate-100">
                 <div className="max-w-4xl mx-auto px-6 text-center">
                     <h2 className="text-3xl md:text-5xl font-bold mb-8">
-                        Start with the Free Diagnostic. Upgrade only when you see improvement.
+                        Start your journey today. Track your improvement.
                     </h2>
-                    <Link href="/login" className="cursor-pointer inline-flex items-center gap-3 px-10 py-5 text-xl rounded-lg font-semibold bg-emerald-600 text-white hover:scale-105 transition-transform shadow-lg">
+                    <Link href="/login" className="cursor-pointer inline-flex items-center gap-3 px-10 py-5 text-xl rounded-lg font-bold bg-emerald-600 text-white hover:scale-105 transition-transform shadow-lg hover:shadow-emerald-600/30">
                         <span>👉 Take Free Diagnostic Test</span>
                         <ArrowRight size={24} />
                     </Link>
-                    <p className="text-sky-800 dark:text-slate-400 mt-6 font-medium">
+                    <p className="text-sky-800 dark:text-slate-400 mt-6 font-medium text-lg">
                         NeetStand is focused on performance improvement — not random questions. Get direction that moves your score.
                     </p>
                 </div>

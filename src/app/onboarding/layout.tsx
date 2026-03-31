@@ -19,7 +19,7 @@ async function AuthGuard() {
             .eq("id", user.id)
             .single();
 
-        if (profile?.onboarding_status === "COMPLETED" && profile?.has_paid) {
+        if (profile?.onboarding_status === "COMPLETED") {
             redirect("/dashboard");
         }
     }

@@ -19,7 +19,6 @@ import { cn } from "@/utils/cn";
 import { PlanSelector } from "./components/PlanSelector";
 import { ProgressRing } from "./components/ProgressRing";
 import { SprintTimeline } from "./components/SprintTimeline";
-import { CheckoutModal } from "./components/CheckoutModal";
 import { AnalyticsModal } from "./components/AnalyticsModal";
 import { ProgressModal } from "./components/ProgressModal";
 import { subjectIconMap, subjectColors } from "./components/SharedConfig";
@@ -196,12 +195,8 @@ export default function SprintDashboard({
     onOpenCheckout?: () => void;
     userId?: string;
 }) {
-    const [showCheckout, setShowCheckout] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [showProgressModal, setShowProgressModal] = useState(false);
-    const handleRequiresPro = () => onOpenCheckout ? onOpenCheckout() : setShowCheckout(true);
-
-    // Show access-blocked toast when redirected from a locked subject
     const searchParams = useSearchParams();
     const router = useRouter();
     useEffect(() => {
@@ -307,8 +302,6 @@ export default function SprintDashboard({
 
     return (
         <div className="relative min-h-[calc(100vh-64px)] bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-            {/* Only render internal modal if no parent is controlling it */}
-            {!onOpenCheckout && <CheckoutModal isOpen={showCheckout} onClose={() => setShowCheckout(false)} plansData={plansData} />}
 
             {/* ─── Hero header ──────────────────────────────────────────── */}
             <div className="relative overflow-hidden">
@@ -341,7 +334,6 @@ export default function SprintDashboard({
                                 <PlanSelector
                                     availablePlans={availablePlans}
                                     activePlanId={activePlanId}
-                                    onRequiresPro={!hasActivated ? handleRequiresPro : undefined}
                                     activeProductString={activeProductString}
                                 />
                             </div>
@@ -396,7 +388,6 @@ export default function SprintDashboard({
                                 currentDay={currentDay}
                                 activatedSubjects={activatedSubjects || null}
                                 subjectFocus={subjectFocus}
-                                onRequiresPro={!hasActivated ? handleRequiresPro : undefined}
                             />
                         </div>
                     );
@@ -404,7 +395,7 @@ export default function SprintDashboard({
             </div>
 
             {/* ─── Bonus Section ────────────────────────────────────────── */}
-            {activePlan?.bonuses && activePlan.bonuses.length > 0 && hasActivated && (
+            {activePlan?.bonuses && activePlan.bonuses.length > 0 && (
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-20">
                     <div className="relative rounded-3xl border border-amber-200/50 dark:border-amber-500/20 bg-gradient-to-b from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-900/50 overflow-hidden">
                         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-50" />
@@ -487,11 +478,7 @@ export default function SprintDashboard({
                     </div>
                 </div>
             )}
-            <CheckoutModal
-                isOpen={showCheckout}
-                onClose={() => setShowCheckout(false)}
-                plansData={plansData}
-            />
+
 
             <AnalyticsModal
                 isOpen={showAnalytics}

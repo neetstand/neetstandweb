@@ -4,7 +4,7 @@ import TopicPageClient from "./TopicPageClient";
 import DynamicTopicPageClient from "./DynamicTopicPageClient";
 import { getChapterBySlug } from "@/actions/learnData";
 
-const FULL_BUNDLE_PLANS = ["30 Day Sprint Plan", "30-Day Sprint Plan", "Groundbreaker Plan", "Challenger Plan", "Topper Plan"];
+
 
 interface PageProps {
     params: Promise<{ subject: string; topic: string }>;
@@ -21,30 +21,8 @@ export default async function TopicPage({ params }: PageProps) {
         return redirect("/");
     }
 
-    // Fetch all activated plans for the user
-    const { data: userPlans } = await supabase
-        .from("user_plan_purchases")
-        .select("status, plans(plan_name)")
-        .eq("user_id", user.id)
-        .eq("status", "active");
-
-    // Determine which subjects the user can access
-    let allowedSubjects: string[] = [];
-
-    if (userPlans && userPlans.length > 0) {
-        const mappedPlans = userPlans.map(p => ({
-            plan_name: (p.plans as any)?.plan_name
-        }));
-
-        const hasFullBundle = mappedPlans.some(p => FULL_BUNDLE_PLANS.includes(p.plan_name));
-        if (hasFullBundle) {
-            allowedSubjects = ["physics", "chemistry", "biology"];
-        } else {
-            if (mappedPlans.some(p => p.plan_name?.toLowerCase().includes("physics"))) allowedSubjects.push("physics");
-            if (mappedPlans.some(p => p.plan_name?.toLowerCase().includes("chemistry"))) allowedSubjects.push("chemistry");
-            if (mappedPlans.some(p => p.plan_name?.toLowerCase().includes("biology"))) allowedSubjects.push("biology");
-        }
-    }
+    // Access is completely free for all subjects
+    const allowedSubjects: string[] = ["physics", "chemistry", "biology"];
 
     // Attempt dynamic database fetch matching chapter slugs
     const chapterData = await getChapterBySlug(subject);

@@ -27,10 +27,7 @@ export default async function Dashboard() {
 
     const availablePlans = await getAvailableSprintPlans();
 
-    // Fetch product pricing plans
-    const { data: plansData } = await supabase.from('plans').select('*');
-
-    // Default to the Topper Plan (which we assume is first) if user has no plan selected
+    // Default to the Topper Plan if user has no plan selected
     const fallbackPlanId = availablePlans.length > 0 ? availablePlans[0].id : null;
     const planToFetch = activePlanId || fallbackPlanId;
 
@@ -41,50 +38,11 @@ export default async function Dashboard() {
         user.email?.split("@")[0] ||
         undefined;
 
-    // Check plan activation status
-    const { data: userPlans } = await supabase
-        .from("user_plan_purchases")
-        .select("status, plans(plan_name)")
-        .eq("user_id", user.id)
-        .eq("status", "active");
-
-    let activatedSubjects: string[] | null = null;
-    let hasActivated = false;
-    let activeProductString: string | null = null;
-
-    if (userPlans && userPlans.length > 0) {
-        hasActivated = true;
-
-        const mappedPlans = userPlans.map(p => ({
-            plan_name: (p.plans as any)?.plan_name
-        }));
-
-        // Find the most relevant purchased product to act as their "active" product for UI purposes
-        // Sort to prefer full bundles if they have multiple
-        const sortedPlans = [...mappedPlans].sort((a, b) => {
-            const isAFull = ["30 Day Sprint Plan", "Groundbreaker Plan", "Challenger Plan", "Topper Plan"].includes(a.plan_name);
-            const isBFull = ["30 Day Sprint Plan", "Groundbreaker Plan", "Challenger Plan", "Topper Plan"].includes(b.plan_name);
-            return (isAFull === isBFull) ? 0 : isAFull ? -1 : 1;
-        });
-
-        activeProductString = sortedPlans[0].plan_name;
-
-        const hasFullBundle = sortedPlans.some(p =>
-            p.plan_name === "30 Day Sprint Plan" ||
-            p.plan_name === "Groundbreaker Plan" ||
-            p.plan_name === "Challenger Plan" ||
-            p.plan_name === "Topper Plan"
-        );
-
-        if (hasFullBundle) {
-            activatedSubjects = ["physics", "chemistry", "biology"];
-        } else {
-            activatedSubjects = [];
-            if (sortedPlans.some(p => p.plan_name === "30 Day Physics" || p.plan_name?.includes("Physics"))) activatedSubjects.push("physics");
-            if (sortedPlans.some(p => p.plan_name === "30 Day Chemistry" || p.plan_name?.includes("Chemistry"))) activatedSubjects.push("chemistry");
-            if (sortedPlans.some(p => p.plan_name === "30 Day Biology" || p.plan_name?.includes("Biology"))) activatedSubjects.push("biology");
-        }
-    }
+    // Everything is completely free now
+    const hasActivated = true;
+    const activatedSubjects = ["physics", "chemistry", "biology"];
+    const activeProductString = "30 Day Sprint Plan";
+    const plansData: any[] = [];
 
     const commonProps = {
         userName: displayName,
