@@ -208,7 +208,7 @@ function DayCard({
     isCompleted: boolean;
     isExpanded: boolean;
     onToggle: () => void;
-    onTopicClick: (subjectId: string, topicId: string, dayNum: number, actualSubject: string) => void;
+    onTopicClick: (subjectId: string, topicId: string, dayNum: number, actualSubject: string, endOrder?: number) => void;
     onAssessmentClick: (assessment: any, dayNum: number) => void;
     subjectFocus?: "physics" | "chemistry" | "biology";
     completedAssessmentKeys: Set<string>;
@@ -321,21 +321,21 @@ function DayCard({
                                     <SubjectTopicCard
                                         topic={sprintDay.physics}
                                         subjectKey="physics"
-                                        onClick={() => onTopicClick(sprintDay.physics.subjectId, sprintDay.physics.topicId, sprintDay.day, "physics")}
+                                        onClick={() => onTopicClick(sprintDay.physics.subjectId, sprintDay.physics.topicId, sprintDay.day, "physics", sprintDay.physics.endOrder)}
                                     />
                                 )}
                                 {(!subjectFocus || subjectFocus === "chemistry") && sprintDay.chemistry && (
                                     <SubjectTopicCard
                                         topic={sprintDay.chemistry}
                                         subjectKey="chemistry"
-                                        onClick={() => onTopicClick(sprintDay.chemistry.subjectId, sprintDay.chemistry.topicId, sprintDay.day, "chemistry")}
+                                        onClick={() => onTopicClick(sprintDay.chemistry.subjectId, sprintDay.chemistry.topicId, sprintDay.day, "chemistry", sprintDay.chemistry.endOrder)}
                                     />
                                 )}
                                 {(!subjectFocus || subjectFocus === "biology") && sprintDay.biology && (
                                     <SubjectTopicCard
                                         topic={sprintDay.biology}
                                         subjectKey="biology"
-                                        onClick={() => onTopicClick(sprintDay.biology.subjectId, sprintDay.biology.topicId, sprintDay.day, "biology")}
+                                        onClick={() => onTopicClick(sprintDay.biology.subjectId, sprintDay.biology.topicId, sprintDay.day, "biology", sprintDay.biology.endOrder)}
                                     />
                                 )}
                             </div>
@@ -420,23 +420,13 @@ export function SprintTimeline({
 
     const getAssessmentKey = (dayNum: number, type: string) => `${dayNum}-${type}`;
 
-    const handleTopicClick = (subjectId: string, topicId: string, dayNum: number, actualSubject: string) => {
-        if (!activatedSubjects || !activatedSubjects.includes(actualSubject)) {
-            if (onRequiresPro) {
-                onRequiresPro();
-                return;
-            }
-        }
-        router.push(`/learn/${subjectId}/${topicId}`);
+    const handleTopicClick = (subjectId: string, topicId: string, dayNum: number, actualSubject: string, endOrder?: number) => {
+        let url = `/learn/${subjectId}/${topicId}`;
+        if (endOrder) url += `?end=${endOrder}`;
+        router.push(url);
     };
 
     const handleAssessmentClick = (assessment: any, dayNum: number) => {
-        if (!activatedSubjects || activatedSubjects.length < 3) {
-            if (onRequiresPro) {
-                onRequiresPro();
-                return;
-            }
-        }
         setSelectedAssessment({ assessment, dayNum });
     };
 
@@ -465,12 +455,6 @@ export function SprintTimeline({
                     isCompleted={completedDaySet.has(day.day)}
                     isExpanded={expandedDay === day.day}
                     onToggle={() => {
-                        if (day.day > 2 && (!activatedSubjects || activatedSubjects.length === 0)) {
-                            if (onRequiresPro) {
-                                onRequiresPro();
-                                return;
-                            }
-                        }
                         setExpandedDay(prev => prev === day.day ? null : day.day);
                     }}
                     onTopicClick={handleTopicClick}

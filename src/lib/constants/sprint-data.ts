@@ -32,6 +32,8 @@ export interface DayTopic {
     probability: "high" | "medium" | "low";
     /** Complexity: 1-5 scale */
     complexity: number;
+    /** The index of the last subtopic to show */
+    endOrder?: number;
 }
 
 export interface DailyAssessment {

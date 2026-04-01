@@ -247,6 +247,7 @@ export default function SprintDashboard({
                     // Route directly via URL parameters
                     subjectId: slugify(chapterData.chapter_name) || staticTopic.subjectId,
                     topicId: String(Math.max(1, startOrder || 1)),
+                    endOrder: endOrder,
                     label: chapterData.chapter_name,
                     complexity,
                     estimatedMinutes: calculatedMinutes > 0 ? calculatedMinutes : 60,

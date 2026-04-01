@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     getQuestions,
@@ -532,6 +532,23 @@ export default function DynamicTopicPageClient({
     completedSubChapterCodes?: string[];
 }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // Determine if we should constrain the view to a specific part range (e.g., from sprint dashboard)
+    const endParamStr = searchParams.get('end');
+    const isSprintRange = Boolean(endParamStr);
+    const sprintStartOrder = Math.max(1, parseInt(initialPart) || 1);
+    const sprintEndOrder = isSprintRange ? parseInt(endParamStr!) : null;
+
+    const displaySubChapters = useMemo(() => {
+        if (!chapterData || !chapterData.sub_chapters) return [];
+        if (isSprintRange && sprintEndOrder) {
+            const startIndex = Math.max(0, sprintStartOrder - 1);
+            const endIndex = Math.max(startIndex, sprintEndOrder - 1);
+            return chapterData.sub_chapters.slice(startIndex, endIndex + 1);
+        }
+        return chapterData.sub_chapters;
+    }, [chapterData, isSprintRange, sprintStartOrder, sprintEndOrder]);
 
     // Reconstruct theme base on chapter subject
     const subjectTitle = chapterData.subject || "Physics";
@@ -551,8 +568,8 @@ export default function DynamicTopicPageClient({
     let firstIncompleteStep = 0;
     let foundIncomplete = false;
 
-    if (chapterData && chapterData.sub_chapters) {
-        chapterData.sub_chapters.forEach((st: any, i: number) => {
+    if (displaySubChapters) {
+        displaySubChapters.forEach((st: any, i: number) => {
             if (completedSubChapterCodes.includes(st.sub_chapter_code)) {
                 initialCompletedSteps.add(i);
             } else if (!foundIncomplete) {
@@ -562,7 +579,7 @@ export default function DynamicTopicPageClient({
         });
     }
 
-    const initialStep = foundIncomplete ? firstIncompleteStep : Math.max(0, parseInt(initialPart) - 1);
+    const initialStep = foundIncomplete ? firstIncompleteStep : (isSprintRange ? 0 : Math.max(0, parseInt(initialPart) - 1));
 
     const [activeStep, setActiveStep] = useState(initialStep);
     const [completedSteps, setCompletedSteps] = useState<Set<number>>(initialCompletedSteps);
@@ -576,8 +593,8 @@ export default function DynamicTopicPageClient({
         let firstIncomplete = 0;
         let found = false;
 
-        if (chapterData && chapterData.sub_chapters) {
-            chapterData.sub_chapters.forEach((st: any, i: number) => {
+        if (displaySubChapters) {
+            displaySubChapters.forEach((st: any, i: number) => {
                 if (completedSubChapterCodes.includes(st.sub_chapter_code)) {
                     nextSteps.add(i);
                 } else if (!found) {
@@ -591,15 +608,15 @@ export default function DynamicTopicPageClient({
         setCompletedSteps(nextSteps);
 
         // Also sync the active step based on new props (only when navigating intentionally)
-        const nextInitialStep = found ? firstIncomplete : Math.max(0, parseInt(initialPart) - 1);
+        const nextInitialStep = found ? firstIncomplete : (isSprintRange ? 0 : Math.max(0, parseInt(initialPart) - 1));
         setActiveStep(nextInitialStep);
-    }, [chapterId, initialPart]); // Deliberately dropped completedCodesStr to prevent background revalidations from resetting activeStep
+    }, [chapterId, initialPart, displaySubChapters, isSprintRange]); // Deliberately dropped completedCodesStr to prevent background revalidations from resetting activeStep
 
     // Dedicated sync to fetch any newly completed stuff from background refreshes
     useEffect(() => {
         const nextSteps = new Set<number>();
-        if (chapterData && chapterData.sub_chapters) {
-            chapterData.sub_chapters.forEach((st: any, i: number) => {
+        if (displaySubChapters) {
+            displaySubChapters.forEach((st: any, i: number) => {
                 if (completedSubChapterCodes.includes(st.sub_chapter_code)) {
                     nextSteps.add(i);
                 }
@@ -632,7 +649,7 @@ export default function DynamicTopicPageClient({
         setIsFullscreen(v => !v);
     }
 
-    if (!chapterData || !chapterData.sub_chapters || chapterData.sub_chapters.length === 0) {
+    if (!chapterData || !chapterData.sub_chapters || chapterData.sub_chapters.length === 0 || displaySubChapters.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <p className="text-gray-500">No content available for this chapter.</p>
@@ -640,7 +657,7 @@ export default function DynamicTopicPageClient({
         );
     }
 
-    const activeSubTopic = chapterData.sub_chapters[activeStep] || chapterData.sub_chapters[0];
+    const activeSubTopic = displaySubChapters[activeStep] || displaySubChapters[0];
     const hasQuestions = activeSubTopic.questions && activeSubTopic.questions.length > 0;
     const questionCount = activeSubTopic.questions?.length || 0;
 
@@ -697,7 +714,7 @@ export default function DynamicTopicPageClient({
             next.add(activeStep);
             return next;
         });
-        if (activeStep < chapterData.sub_chapters.length - 1) {
+        if (activeStep < displaySubChapters.length - 1) {
             setActiveStep(activeStep + 1);
             setActiveSection("videos");
             setAllQuestionsAttempted(false);
@@ -706,7 +723,7 @@ export default function DynamicTopicPageClient({
         }
     };
 
-    const progress = (completedSteps.size / chapterData.sub_chapters.length) * 100;
+    const progress = (completedSteps.size / displaySubChapters.length) * 100;
 
     return (
         <div className="min-h-[calc(100vh-64px)] bg-gray-50/50 dark:bg-slate-950">
@@ -780,12 +797,12 @@ export default function DynamicTopicPageClient({
                             <div className="max-h-[calc(100vh-200px)] overflow-y-auto pl-2 pr-2 -ml-2 -mr-2 pt-2 pb-4 
                                 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 
                                 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-track]:bg-transparent">
-                                {chapterData.sub_chapters.map((st: any, i: number) => (
+                                {displaySubChapters.map((st: any, i: number) => (
                                     <StepChainItem
                                         key={st.id}
                                         subTopic={st}
                                         index={i}
-                                        total={chapterData.sub_chapters.length}
+                                        total={displaySubChapters.length}
                                         isActive={activeStep === i}
                                         isCompleted={completedSteps.has(i)}
                                         onClick={() => handleStepClick(i)}
