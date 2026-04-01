@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Moon, Sun, User as UserIcon, LogOut, Settings, Flag } from "lucide-react";
+import { Moon, Sun, User as UserIcon, LogOut, Flag } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -156,10 +156,7 @@ export function NavbarClient({ initialUser }: { initialUser: SupabaseUser | null
                                             <span>Challenges</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="cursor-pointer">
-                                        <Settings className="mr-2 h-4 w-4" />
-                                        <span>Settings</span>
-                                    </DropdownMenuItem>
+
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600" onClick={handleSignOut}>
                                         <LogOut className="mr-2 h-4 w-4" />

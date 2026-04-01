@@ -64,7 +64,7 @@ export const Footer = () => {
                         title: "Product",
                         links: [
                             { label: "Features", href: "/#features" },
-                            { label: "Pricing", href: "/#pricing" }
+                            { label: "Pricing", href: "/pricing" }
                         ],
                     },
                     {
