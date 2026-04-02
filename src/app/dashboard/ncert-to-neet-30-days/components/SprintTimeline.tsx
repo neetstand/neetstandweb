@@ -73,7 +73,7 @@ function SubjectTopicCard({
             whileHover={{ scale: 1.01, y: -1 }}
             whileTap={{ scale: 0.99 }}
             className={cn(
-                "group w-full rounded-xl border p-4 text-left transition-all duration-200",
+                "group w-full rounded-xl border p-4 text-left transition-all duration-200 cursor-pointer",
                 "bg-white dark:bg-slate-900/60",
                 "border-gray-100 dark:border-slate-800",
                 "hover:border-gray-200 dark:hover:border-slate-700",
