@@ -10,6 +10,8 @@ import {
 
 import { cn } from "@/utils/cn";
 import { Button } from "@/components/ui/button";
+import { generateFlashTest, FlashPracticeQuestion } from "@/actions/flashTest";
+import { Loader2 } from "lucide-react";
 
 // ─── Formatting Helper ────────────────────────────────────────────────────────
 function formatTimeLeft(seconds: number) {
@@ -49,6 +51,10 @@ export function AssessmentModal({
     const [activeSubject, setActiveSubject] = useState<"biology" | "chemistry" | "physics">(defaultSubject);
     const [showNavDrawer, setShowNavDrawer] = useState(false);
 
+    const [testQuestions, setTestQuestions] = useState<FlashPracticeQuestion[]>([]);
+    const [isLoadingTest, setIsLoadingTest] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
+
     // User Answers Tracking state
     const [answers, setAnswers] = useState<Record<string, number>>({});
     const [markedForReview, setMarkedForReview] = useState<Set<string>>(new Set());
@@ -60,15 +66,17 @@ export function AssessmentModal({
     const chemQ = subjectFocus ? (subjectFocus === "chemistry" ? totalQ : 0) : Math.round(totalQ * 0.3);
     const phyQ = subjectFocus ? (subjectFocus === "physics" ? totalQ : 0) : totalQ - Math.ceil(totalQ * 0.5) - Math.round(totalQ * 0.3);
 
+    const isFlashActive = assessment?.type === "flash" && testQuestions.length > 0;
+
     // Build Mock Question IDs based on totals
-    const bioQs = Array.from({ length: bioQ }, (_, i) => `bio-${i + 1}`);
-    const chemQs = Array.from({ length: chemQ }, (_, i) => `chem-${i + 1}`);
-    const phyQs = Array.from({ length: phyQ }, (_, i) => `phy-${i + 1}`);
+    const bioQs = isFlashActive ? testQuestions.filter(q => q.subject_name === "biology").map(q => q.question_id) : Array.from({ length: bioQ }, (_, i) => `bio-${i + 1}`);
+    const chemQs = isFlashActive ? testQuestions.filter(q => q.subject_name === "chemistry").map(q => q.question_id) : Array.from({ length: chemQ }, (_, i) => `chem-${i + 1}`);
+    const phyQs = isFlashActive ? testQuestions.filter(q => q.subject_name === "physics").map(q => q.question_id) : Array.from({ length: phyQ }, (_, i) => `phy-${i + 1}`);
 
     const allSubjects = [
-        { id: "biology", label: "Biology", icon: Dna, count: bioQ, qIds: bioQs, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
-        { id: "chemistry", label: "Chemistry", icon: FlaskConical, count: chemQ, qIds: chemQs, color: "text-cyan-500", bg: "bg-cyan-50 dark:bg-cyan-500/10" },
-        { id: "physics", label: "Physics", icon: Atom, count: phyQ, qIds: phyQs, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
+        { id: "biology", label: "Biology", icon: Dna, count: isFlashActive ? bioQs.length : bioQ, qIds: bioQs, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+        { id: "chemistry", label: "Chemistry", icon: FlaskConical, count: isFlashActive ? chemQs.length : chemQ, qIds: chemQs, color: "text-cyan-500", bg: "bg-cyan-50 dark:bg-cyan-500/10" },
+        { id: "physics", label: "Physics", icon: Atom, count: isFlashActive ? phyQs.length : phyQ, qIds: phyQs, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
     ] as const;
     // When a subject is focused, show only that tab
     const subjects = subjectFocus ? allSubjects.filter(s => s.id === subjectFocus) : allSubjects;
@@ -142,7 +150,10 @@ export function AssessmentModal({
         if (currentIndex < allQIds.length - 1) {
             const nextQId = allQIds[currentIndex + 1];
             setActiveQuestionId(nextQId);
-            if (nextQId.startsWith("bio")) setActiveSubject("biology");
+            
+            const activeQuestion = testQuestions.find(q => q.question_id === nextQId);
+            if (activeQuestion) setActiveSubject(activeQuestion.subject_name as any);
+            else if (nextQId.startsWith("bio")) setActiveSubject("biology");
             else if (nextQId.startsWith("chem")) setActiveSubject("chemistry");
             else if (nextQId.startsWith("phy")) setActiveSubject("physics");
         } else {
@@ -157,7 +168,10 @@ export function AssessmentModal({
         if (currentIndex > 0) {
             const prevQId = allQIds[currentIndex - 1];
             setActiveQuestionId(prevQId);
-            if (prevQId.startsWith("bio")) setActiveSubject("biology");
+            
+            const activeQuestion = testQuestions.find(q => q.question_id === prevQId);
+            if (activeQuestion) setActiveSubject(activeQuestion.subject_name as any);
+            else if (prevQId.startsWith("bio")) setActiveSubject("biology");
             else if (prevQId.startsWith("chem")) setActiveSubject("chemistry");
             else if (prevQId.startsWith("phy")) setActiveSubject("physics");
         }
@@ -183,9 +197,35 @@ export function AssessmentModal({
 
     if (!isOpen || !assessment) return null;
 
-    const handleStartTest = () => {
+    const handleStartTest = async () => {
         if (!hasReadInstructions) return;
-        setStep("test");
+        if (assessment.type === "flash") {
+            setIsLoadingTest(true);
+            setErrorMsg("");
+            
+            const targetDays = (assessment.coversDays || [currentDayNumber]).map((d: number) => Math.max(1, d - 1));
+            
+            try {
+                const res = await generateFlashTest({ targetDays: targetDays.length > 0 ? targetDays : [1] });
+                if (res.status === "success") {
+                    setTestQuestions(res.questions);
+                    if (res.questions.length > 0) {
+                        const firstQ = res.questions.find(q => q.subject_name === subjectFocus) || res.questions[0];
+                        setActiveQuestionId(firstQ.question_id);
+                        setActiveSubject(firstQ.subject_name as any);
+                    }
+                    setStep("test");
+                } else {
+                    setErrorMsg(res.message);
+                }
+            } catch (err: any) {
+                setErrorMsg(err.message || "An unexpected error occurred while generating the test.");
+            } finally {
+                setIsLoadingTest(false);
+            }
+        } else {
+            setStep("test");
+        }
     };
 
     return (
@@ -277,6 +317,11 @@ export function AssessmentModal({
                             </div>
 
                             {/* Footer */}
+                            {errorMsg && (
+                                <div className="mx-6 mb-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 font-medium">
+                                    {errorMsg}
+                                </div>
+                            )}
                             <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <div className={cn(
@@ -298,15 +343,25 @@ export function AssessmentModal({
                                     </span>
                                 </label>
 
-                                <Button
-                                    onClick={handleStartTest}
-                                    disabled={!hasReadInstructions}
-                                    className="w-full sm:w-auto min-w-[160px] gap-2"
-                                    size="lg"
-                                >
-                                    Start Test
-                                    <Play className="w-4 h-4 fill-current" />
-                                </Button>
+                                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                    <Button
+                                        onClick={onClose}
+                                        variant="outline"
+                                        className="w-full sm:w-auto"
+                                        size="lg"
+                                    >
+                                        Back to Dashboard
+                                    </Button>
+                                    <Button
+                                        onClick={handleStartTest}
+                                        disabled={!hasReadInstructions || isLoadingTest}
+                                        className="w-full sm:w-auto min-w-[160px] gap-2"
+                                        size="lg"
+                                    >
+                                        Start Test
+                                        {isLoadingTest ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -316,12 +371,21 @@ export function AssessmentModal({
                         <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-950">
                             {/* Test Header */}
                             <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm z-10">
-                                <div>
-                                    <div className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1">
-                                        {assessment.label}
-                                    </div>
-                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                        {totalQ} Questions Remaining
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={onClose}
+                                        className="p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
+                                        title="Back to Dashboard"
+                                    >
+                                        <ArrowLeft className="w-5 h-5" />
+                                    </button>
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1">
+                                            {assessment.label}
+                                        </div>
+                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                            {totalQ} Questions Remaining
+                                        </div>
                                     </div>
                                 </div>
 
@@ -378,7 +442,59 @@ export function AssessmentModal({
                             {/* Question Canvas */}
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
                                 <div className="max-w-3xl mx-auto">
-                                    {/* Mock Question */}
+                                    {/* Question Canvas Logic */}
+                                    {(() => {
+                                        const q = testQuestions.find(qt => qt.question_id === activeQuestionId);
+                                        if (q) {
+                                            return (
+                                                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                                                    <div className="flex items-center gap-3 mb-6">
+                                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 font-bold text-sm">
+                                                            {allQIds.indexOf(activeQuestionId) + 1}
+                                                        </div>
+                                                        <div className="font-semibold text-gray-900 dark:text-white text-lg leading-relaxed max-w-none prose dark:prose-invert" dangerouslySetInnerHTML={{ __html: q.question_text }} />
+                                                    </div>
+                                                    
+                                                    {q.has_images && q.images.length > 0 && (
+                                                        <div className="mb-6 flex flex-col items-center gap-4">
+                                                            {q.images.map((imgUrl: string, idx: number) => (
+                                                                <img key={idx} src={imgUrl} alt="Question Diagram" className="max-w-full h-auto rounded-lg border border-gray-200 dark:border-slate-700" />
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="space-y-3">
+                                                        {q.options.map((opt: any, i: number) => {
+                                                            const isSelected = answers[activeQuestionId] === i;
+                                                            return (
+                                                                <button
+                                                                    key={i}
+                                                                    onClick={() => setAnswers(prev => ({ ...prev, [activeQuestionId]: i }))}
+                                                                    className={cn(
+                                                                        "w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all font-medium",
+                                                                        isSelected
+                                                                            ? "bg-sky-50 border-sky-500 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300"
+                                                                            : "border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:border-sky-300 dark:hover:border-sky-500/50 hover:bg-gray-50 dark:hover:bg-slate-800/50"
+                                                                    )}
+                                                                >
+                                                                    <div className={cn(
+                                                                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border",
+                                                                        isSelected
+                                                                            ? "bg-sky-500 border-sky-500 text-white"
+                                                                            : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500"
+                                                                    )}>
+                                                                        {opt.label}
+                                                                    </div>
+                                                                    <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: opt.option_text }} />
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
                                     <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
                                         <div className="flex items-center gap-3 mb-6">
                                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 font-bold text-sm">
@@ -415,6 +531,8 @@ export function AssessmentModal({
                                             })}
                                         </div>
                                     </div>
+                                    );
+                                    })()}
 
                                     {/* Test Controls */}
                                     <div className="flex items-center justify-between mt-8">
