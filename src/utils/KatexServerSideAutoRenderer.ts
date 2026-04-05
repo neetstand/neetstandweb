@@ -1,4 +1,5 @@
 import katex from "katex";
+import "katex/contrib/mhchem";
 
 // const str = String.raw`<p>This is what I was seeing [inlineFontSize="1rem"]**0.412\overline{2}**, is: and the other side was [blockFontSize="1.5rem"]$$0.412\overline{6}$$ and finally I see the light of day.</p>`;
 // The above gives a clear example. [inlineFontSize]** should be after it. for [blockFontSize]$$ is valid.
