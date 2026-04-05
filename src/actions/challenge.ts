@@ -12,15 +12,28 @@ export async function submitQuestionChallenge(question_id: string, issue_type: s
         return { status: "error", message: "User not authenticated" };
     }
 
+    // Check for existing challenge to mimic ignoreDuplicates behavior
+    const { data: existing } = await supabase
+        .from("question_challenges")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("question_id", question_id)
+        .limit(1)
+        .maybeSingle();
+
+    if (existing) {
+        return { status: "success" }; // Ignore duplicate
+    }
+
     const { error } = await supabase
         .from("question_challenges")
-        .upsert({
+        .insert({
             user_id: user.id,
             question_id: question_id,
             issue_type: issue_type,
             user_comment: user_comment,
             status: "Under Review",
-        }, { onConflict: "user_id, question_id", ignoreDuplicates: true });
+        });
 
     if (error) {
         console.error("Error submitting question challenge:", error);
